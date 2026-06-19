@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Mail, Phone, MapPin, Linkedin, Twitter, Facebook } from 'lucide-react'
+import { Mail, Phone, MapPin, Linkedin, Twitter, Facebook, Zap } from 'lucide-react'
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
@@ -10,9 +10,14 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {/* Company Info */}
           <div>
-            <h3 className="font-bold text-lg mb-4 text-white">Shared Solar</h3>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
+                <Zap className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="font-bold text-lg text-white">VNM | GNM</h3>
+            </div>
             <p className="text-slate-400 text-sm mb-6">
-              Helping communities and businesses save money through shared solar energy solutions.
+              Helping communities and businesses reduce electricity bills through shared solar energy solutions.
             </p>
             <div className="flex gap-4">
               <a href="#" className="hover:text-primary-400 transition-colors">
@@ -91,8 +96,8 @@ export default function Footer() {
               </li>
               <li className="flex gap-3">
                 <Mail className="w-4 h-4 text-primary-400 flex-shrink-0 mt-0.5" />
-                <a href="mailto:hello@sharedsolar.co" className="text-slate-400 hover:text-primary-400 transition-colors">
-                  hello@sharedsolar.co
+                <a href="mailto:hello@vnm-gnm.co" className="text-slate-400 hover:text-primary-400 transition-colors">
+                  hello@vnm-gnm.co
                 </a>
               </li>
               <li className="flex gap-3">
@@ -107,7 +112,7 @@ export default function Footer() {
         <div className="border-t border-slate-800 pt-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-slate-400">
             <div>
-              © {currentYear} Shared Solar. All rights reserved.
+              © {currentYear} VNM | GNM Solar. All rights reserved.
             </div>
             <div className="flex gap-6 justify-start sm:justify-end">
               <a href="#" className="hover:text-primary-400 transition-colors">

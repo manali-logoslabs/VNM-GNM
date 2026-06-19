@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
-import Home from './pages/Home'
+import LandingPage from './pages/LandingPage'
 import VirtualNetMetering from './pages/VirtualNetMetering'
 import GroupNetMetering from './pages/GroupNetMetering'
 import Comparison from './pages/Comparison'
@@ -19,7 +19,7 @@ export default function App() {
         <Navbar />
         <main className="flex-grow">
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<LandingPage />} />
             <Route path="/vnm" element={<VirtualNetMetering />} />
             <Route path="/gnm" element={<GroupNetMetering />} />
             <Route path="/comparison" element={<Comparison />} />

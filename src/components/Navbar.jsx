@@ -1,75 +1,117 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Menu, X, Zap } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Menu, X, Zap } from 'lucide-react'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
   const location = useLocation()
+  const isLandingPage = location.pathname === '/'
 
-  const navItems = [
-    { label: 'Home', href: '/' },
-    { label: 'VNM', href: '/vnm' },
-    { label: 'GNM', href: '/gnm' },
-    { label: 'Compare', href: '/comparison' },
-    { label: 'Calculator', href: '/calculator' },
-    { label: 'Eligibility', href: '/eligibility' },
-    { label: 'States', href: '/states' },
-    { label: 'Case Studies', href: '/case-studies' },
-    { label: 'FAQ', href: '/faq' },
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const navLinks = [
+    { label: 'Why VNM/GNM', href: '#why-vnm-gnm' },
+    { label: 'Savings Calculator', href: '#calculator' },
+    { label: 'Coverage', href: '#coverage' },
+    { label: 'Success Stories', href: '#stories' },
+    { label: 'Contact', href: '#contact' },
   ]
 
-  const isActive = (path) => location.pathname === path
+  const secondaryLinks = [
+    { label: 'About', path: '/about' },
+    { label: 'FAQ', path: '/faq' },
+    { label: 'States', path: '/states' },
+  ]
+
+  const handleNavClick = (e, href) => {
+    if (isLandingPage && href.startsWith('#')) {
+      e.preventDefault()
+      const element = document.querySelector(href)
+      element?.scrollIntoView({ behavior: 'smooth' })
+      setIsOpen(false)
+    }
+  }
 
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b border-slate-200">
-      <div className="container-wide">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 font-bold text-xl">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-primary-700 rounded-lg flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
+    <>
+      <nav
+        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+          isScrolled
+            ? 'bg-white border-b border-slate-200 shadow-sm'
+            : isLandingPage
+            ? 'bg-transparent'
+            : 'bg-white border-b border-slate-200'
+        }`}
+      >
+        <div className="container-wide">
+          <div className="flex items-center justify-between h-20">
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-2 group">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-primary-700 rounded-lg flex items-center justify-center group-hover:shadow-glow transition-shadow">
+                <Zap className="w-6 h-6 text-white" />
+              </div>
+              <span className="font-bold text-lg hidden sm:block text-slate-900 group-hover:text-primary-600 transition-colors">
+                VNM | GNM
+              </span>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden lg:flex items-center gap-1">
+              {isLandingPage ? (
+                navLinks.map((link) => (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    onClick={(e) => handleNavClick(e, link.href)}
+                    className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 transition-colors"
+                  >
+                    {link.label}
+                  </a>
+                ))
+              ) : (
+                <>
+                  {secondaryLinks.map((link) => (
+                    <Link
+                      key={link.label}
+                      to={link.path}
+                      className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </>
+              )}
             </div>
-            <span className="hidden sm:inline gradient-text">Shared Solar</span>
-          </Link>
 
-          {/* Desktop Menu */}
-          <div className="hidden lg:flex items-center gap-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                to={item.href}
-                className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  isActive(item.href)
-                    ? 'text-primary-600 bg-primary-50'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                }`}
-              >
-                {item.label}
+            {/* CTA Buttons */}
+            <div className="hidden md:flex items-center gap-3">
+              <Link to="/calculator" className="btn-primary text-sm">
+                <Zap className="w-4 h-4" />
+                Calculate
               </Link>
-            ))}
-          </div>
-
-          {/* CTA Buttons */}
-          <div className="flex items-center gap-3">
-            <Link
-              to="/calculator"
-              className="hidden sm:block btn-primary text-sm"
-            >
-              Calculate Savings
-            </Link>
-
-            <Link
-              to="/contact"
-              className="hidden md:block btn-secondary text-sm"
-            >
-              Book Consultation
-            </Link>
+              <a
+                href={isLandingPage ? '#contact' : '#'}
+                onClick={(e) => {
+                  if (isLandingPage) handleNavClick(e, '#contact')
+                }}
+                className="btn-ghost text-sm"
+              >
+                Talk to Expert
+              </a>
+            </div>
 
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="lg:hidden p-2 rounded-lg hover:bg-slate-100"
+              className="lg:hidden p-2 hover:bg-slate-100 rounded-lg transition-colors"
             >
               {isOpen ? (
                 <X className="w-6 h-6" />
@@ -87,44 +129,54 @@ export default function Navbar() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden border-t border-slate-200"
+              className="lg:hidden bg-white border-t border-slate-200"
             >
-              <div className="flex flex-col gap-2 p-4">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    to={item.href}
-                    onClick={() => setIsOpen(false)}
-                    className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      isActive(item.href)
-                        ? 'text-primary-600 bg-primary-50'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-                <div className="flex flex-col gap-2 mt-2 pt-2 border-t border-slate-200">
-                  <Link
-                    to="/calculator"
-                    className="btn-primary text-sm justify-center"
-                    onClick={() => setIsOpen(false)}
-                  >
+              <div className="container-wide py-4 space-y-2">
+                {isLandingPage
+                  ? navLinks.map((link) => (
+                      <a
+                        key={link.label}
+                        href={link.href}
+                        onClick={(e) => handleNavClick(e, link.href)}
+                        className="block px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
+                      >
+                        {link.label}
+                      </a>
+                    ))
+                  : secondaryLinks.map((link) => (
+                      <Link
+                        key={link.label}
+                        to={link.path}
+                        className="block px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                <div className="pt-2 border-t border-slate-200 space-y-2">
+                  <Link to="/calculator" className="btn-primary w-full justify-center text-sm">
+                    <Zap className="w-4 h-4" />
                     Calculate Savings
                   </Link>
-                  <Link
-                    to="/contact"
-                    className="btn-secondary text-sm justify-center"
-                    onClick={() => setIsOpen(false)}
+                  <a
+                    href={isLandingPage ? '#contact' : '#'}
+                    onClick={(e) => {
+                      if (isLandingPage) handleNavClick(e, '#contact')
+                      setIsOpen(false)
+                    }}
+                    className="btn-ghost w-full justify-center text-sm"
                   >
-                    Book Consultation
-                  </Link>
+                    Talk to Expert
+                  </a>
                 </div>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
-    </nav>
+      </nav>
+
+      {/* Spacer */}
+      <div className="h-20" />
+    </>
   )
 }
