@@ -18,17 +18,11 @@ export default function Navbar() {
   }, [])
 
   const navLinks = [
-    { label: 'Why VNM/GNM', href: '#why-vnm-gnm' },
-    { label: 'Savings Calculator', href: '#calculator' },
-    { label: 'Coverage', href: '#coverage' },
-    { label: 'Success Stories', href: '#stories' },
-    { label: 'Contact', href: '#contact' },
-  ]
-
-  const secondaryLinks = [
-    { label: 'About', path: '/about' },
-    { label: 'FAQ', path: '/faq' },
-    { label: 'States', path: '/states' },
+    { label: 'How It Works', href: '#vnm-gnm', path: '/vnm' },
+    { label: 'Calculator', href: '#calculator', path: '/calculator' },
+    { label: 'Coverage', href: '#coverage', path: '/states' },
+    { label: 'Success Stories', href: '#stories', path: '/case-studies' },
+    { label: 'FAQ', href: '#faq', path: '/faq' },
   ]
 
   const handleNavClick = (e, href) => {
@@ -55,18 +49,18 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 group">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-primary-700 rounded-lg flex items-center justify-center group-hover:shadow-glow transition-shadow">
+              <div className="w-10 h-10 bg-gradient-to-br from-accent-600 to-accent-700 rounded-lg flex items-center justify-center group-hover:shadow-glow transition-shadow">
                 <Zap className="w-6 h-6 text-white" />
               </div>
-              <span className="font-bold text-lg hidden sm:block text-slate-900 group-hover:text-primary-600 transition-colors">
-                VNM | GNM
+              <span className="font-bold text-lg hidden sm:block text-slate-900 group-hover:text-accent-600 transition-colors">
+                green house
               </span>
             </Link>
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-1">
-              {isLandingPage ? (
-                navLinks.map((link) => (
+              {navLinks.map((link) => (
+                isLandingPage && link.href ? (
                   <a
                     key={link.label}
                     href={link.href}
@@ -75,20 +69,16 @@ export default function Navbar() {
                   >
                     {link.label}
                   </a>
-                ))
-              ) : (
-                <>
-                  {secondaryLinks.map((link) => (
-                    <Link
-                      key={link.label}
-                      to={link.path}
-                      className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 transition-colors"
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
-                </>
-              )}
+                ) : (
+                  <Link
+                    key={link.label}
+                    to={link.path}
+                    className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                )
+              ))}
             </div>
 
             {/* CTA Buttons */}
@@ -132,27 +122,27 @@ export default function Navbar() {
               className="lg:hidden bg-white border-t border-slate-200"
             >
               <div className="container-wide py-4 space-y-2">
-                {isLandingPage
-                  ? navLinks.map((link) => (
-                      <a
-                        key={link.label}
-                        href={link.href}
-                        onClick={(e) => handleNavClick(e, link.href)}
-                        className="block px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
-                      >
-                        {link.label}
-                      </a>
-                    ))
-                  : secondaryLinks.map((link) => (
-                      <Link
-                        key={link.label}
-                        to={link.path}
-                        className="block px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        {link.label}
-                      </Link>
-                    ))}
+                {navLinks.map((link) => (
+                  isLandingPage && link.href ? (
+                    <a
+                      key={link.label}
+                      href={link.href}
+                      onClick={(e) => handleNavClick(e, link.href)}
+                      className="block px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link
+                      key={link.label}
+                      to={link.path}
+                      className="block px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {link.label}
+                    </Link>
+                  )
+                ))}
                 <div className="pt-2 border-t border-slate-200 space-y-2">
                   <Link to="/calculator" className="btn-primary w-full justify-center text-sm">
                     <Zap className="w-4 h-4" />

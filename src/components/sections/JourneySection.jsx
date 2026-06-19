@@ -55,14 +55,6 @@ export default function JourneySection() {
         {/* Desktop Timeline */}
         <div className="hidden md:block">
           <div className="relative">
-            {/* Timeline Line */}
-            <motion.div
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1 }}
-              className="absolute top-20 left-0 right-0 h-1 bg-gradient-to-r from-primary-600 to-primary-400 origin-left"
-            />
 
             {/* Steps */}
             <div className="grid grid-cols-5 gap-4">

@@ -190,28 +190,6 @@ export default function VNMGNMSection() {
           </Link>
         </motion.div>
 
-        {/* Decision Quiz */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="max-w-2xl mx-auto bg-slate-50 rounded-xl p-8"
-        >
-          <h3 className="text-xl font-bold mb-6 text-center">Which is Right for Me?</h3>
-          <div className="space-y-4">
-            <div>
-              <p className="font-semibold text-slate-900 mb-3">Are you a single owner with multiple connections?</p>
-              <div className="flex gap-4">
-                <button className="flex-1 px-4 py-2 border-2 border-slate-300 rounded-lg hover:border-primary-600 hover:bg-primary-50 transition-colors">
-                  Yes → GNM
-                </button>
-                <button className="flex-1 px-4 py-2 border-2 border-slate-300 rounded-lg hover:border-primary-600 hover:bg-primary-50 transition-colors">
-                  No → VNM
-                </button>
-              </div>
-            </div>
-          </div>
-        </motion.div>
       </div>
     </section>
   )
