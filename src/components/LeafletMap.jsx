@@ -64,8 +64,8 @@ export default function LeafletMap({ selectedState, onStateSelect }) {
       dragging: true
     }).setView([23, 82], 5)
 
-    // Add tile layer with light style
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    // Add simple background - no detailed tiles
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
       attribution: '© OpenStreetMap contributors',
       maxZoom: 10,
       minZoom: 4
