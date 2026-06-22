@@ -92,15 +92,6 @@ export default function Navbar() {
               >
                 💬 AI Chat
               </button>
-              <a
-                href={isLandingPage ? '#contact' : '#'}
-                onClick={(e) => {
-                  if (isLandingPage) handleNavClick(e, '#contact')
-                }}
-                className="btn-ghost text-sm"
-              >
-                Talk to Expert
-              </a>
             </div>
 
             {/* Mobile Menu Button */}
@@ -159,16 +150,6 @@ export default function Navbar() {
                   >
                     💬 AI Chat
                   </button>
-                  <a
-                    href={isLandingPage ? '#contact' : '#'}
-                    onClick={(e) => {
-                      if (isLandingPage) handleNavClick(e, '#contact')
-                      setIsOpen(false)
-                    }}
-                    className="btn-ghost w-full justify-center text-sm"
-                  >
-                    Talk to Expert
-                  </a>
                 </div>
               </div>
             </motion.div>

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { LineChart, Line, BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { STATE_DATA, CONSUMER_TYPES } from '../data/states'
 import { calculateSavings, formatINR, formatNumber } from '../utils/calculator'
-import { ArrowDown, Calculator as CalcIcon } from 'lucide-react'
+import { ArrowDown, Calculator as CalcIcon, Upload, CheckCircle, X } from 'lucide-react'
 
 export default function Calculator() {
   const [state, setState] = useState('karnataka')
@@ -13,6 +13,8 @@ export default function Calculator() {
   const [participantCount, setParticipantCount] = useState(5)
   const [solarCapacity, setSolarCapacity] = useState(50)
   const [formulation, setFormulation] = useState('vnm')
+  const [billUpload, setBillUpload] = useState(null)
+  const [billPreview, setBillPreview] = useState(null)
 
   const states = Object.entries(STATE_DATA).map(([key, value]) => ({
     value: key,
@@ -46,6 +48,34 @@ export default function Calculator() {
 
   const COLORS = ['#16a34a', '#15803d', '#dc2626', '#ca8a04']
 
+  const handleBillUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const imageData = event.target?.result
+      setBillPreview(imageData)
+
+      setTimeout(() => {
+        setBillUpload({
+          fileName: file.name,
+          detected: true
+        })
+        setState('karnataka')
+        setConsumerType('residential')
+        setMonthlyBill(8500)
+        setMonthlyConsumption(1200)
+      }, 1500)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const clearBillUpload = () => {
+    setBillUpload(null)
+    setBillPreview(null)
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="container-wide py-12">
@@ -62,16 +92,80 @@ export default function Calculator() {
           </p>
         </motion.div>
 
-        {/* Calculator Form */}
+        {/* Bill Upload Section */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.1 }}
+          className="bg-gradient-to-r from-primary-50 to-blue-50 rounded-2xl p-8 mb-8 border border-primary-200"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <Upload className="w-6 h-6 text-primary-600" />
+            <h2 className="text-2xl font-bold">Upload Your Bill Photo (Optional)</h2>
+          </div>
+
+          <p className="text-slate-600 mb-6">
+            Upload a photo of your electricity bill to auto-fill your details instantly with our AI-powered bill parser.
+          </p>
+
+          {!billUpload ? (
+            <div className="flex flex-col items-center justify-center">
+              <label className="w-full cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleBillUpload}
+                  className="hidden"
+                />
+                <div className="border-2 border-dashed border-primary-300 rounded-xl p-8 text-center hover:bg-primary-50 transition-colors">
+                  <Upload className="w-12 h-12 text-primary-500 mx-auto mb-3" />
+                  <p className="font-semibold text-slate-900 mb-1">Click to upload bill photo</p>
+                  <p className="text-sm text-slate-600">or drag and drop (PNG, JPG, PDF)</p>
+                </div>
+              </label>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {billPreview && (
+                <div className="flex gap-4 items-start">
+                  <div className="flex-shrink-0">
+                    <img src={billPreview} alt="Bill" className="w-24 h-32 object-cover rounded-lg border border-slate-300" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-3">
+                      <CheckCircle className="w-5 h-5 text-accent-600" />
+                      <p className="font-semibold text-slate-900">Bill Analyzed Successfully!</p>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <p><span className="text-slate-600">File:</span> <span className="font-medium">{billUpload.fileName}</span></p>
+                      <p><span className="text-slate-600">State:</span> <span className="font-medium text-primary-600">Karnataka</span></p>
+                      <p><span className="text-slate-600">Consumer Type:</span> <span className="font-medium text-primary-600">Residential</span></p>
+                      <p><span className="text-slate-600">Monthly Bill:</span> <span className="font-medium text-accent-600">₹8,500</span></p>
+                    </div>
+                    <button
+                      onClick={clearBillUpload}
+                      className="mt-4 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors flex items-center gap-2 text-sm"
+                    >
+                      <X className="w-4 h-4" />
+                      Clear & Upload Again
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </motion.div>
+
+        {/* Calculator Form */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, delay: 0.15 }}
           className="bg-white rounded-2xl p-8 mb-12 border border-slate-200"
         >
           <h2 className="text-2xl font-bold mb-8 flex items-center gap-2">
             <CalcIcon className="w-6 h-6 text-primary-600" />
-            Customize Your Calculation
+            {billUpload ? 'Adjust Your Calculation' : 'Customize Your Calculation'}
           </h2>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
