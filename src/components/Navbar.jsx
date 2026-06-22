@@ -19,7 +19,6 @@ export default function Navbar() {
 
   const navLinks = [
     { label: 'How It Works', href: '#vnm-gnm', path: '/vnm' },
-    { label: 'Calculator', href: '#calculator', path: '/calculator' },
     { label: 'Coverage', href: '#coverage', path: '/states' },
     { label: 'Success Stories', href: '#stories', path: '/case-studies' },
     { label: 'FAQ', href: '#faq', path: '/faq' },
@@ -87,6 +86,12 @@ export default function Navbar() {
                 <Zap className="w-4 h-4" />
                 Calculate
               </Link>
+              <button
+                className="btn-ghost text-sm"
+                title="Chat with AI Assistant"
+              >
+                💬 AI Chat
+              </button>
               <a
                 href={isLandingPage ? '#contact' : '#'}
                 onClick={(e) => {
@@ -148,6 +153,12 @@ export default function Navbar() {
                     <Zap className="w-4 h-4" />
                     Calculate Savings
                   </Link>
+                  <button
+                    className="btn-ghost w-full justify-center text-sm"
+                    title="Chat with AI Assistant"
+                  >
+                    💬 AI Chat
+                  </button>
                   <a
                     href={isLandingPage ? '#contact' : '#'}
                     onClick={(e) => {

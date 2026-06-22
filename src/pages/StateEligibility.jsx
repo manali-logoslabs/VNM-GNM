@@ -26,6 +26,69 @@ export default function StateEligibility() {
           </p>
         </motion.div>
 
+        {/* India Map */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mb-12 bg-white rounded-2xl p-8 border border-slate-200"
+        >
+          <h2 className="text-2xl font-bold mb-6 text-center">Our Coverage Across India</h2>
+          <svg viewBox="0 0 400 500" className="w-full max-w-2xl mx-auto" style={{ height: 'auto' }}>
+            {/* India Map Background */}
+            <rect width="400" height="500" fill="#f0f4f8" />
+
+            {/* State shapes - simplified outlines */}
+            {/* Karnataka */}
+            <g
+              onClick={() => setSelectedState('karnataka')}
+              className={`cursor-pointer transition-all ${selectedState === 'karnataka' ? 'fill-primary-600' : 'fill-primary-100'} hover:fill-primary-300`}
+            >
+              <path d="M 180 280 L 200 270 L 210 290 L 200 310 L 180 305 Z" />
+              <text x="190" y="295" textAnchor="middle" className="text-xs font-bold fill-slate-900">KA</text>
+            </g>
+
+            {/* Maharashtra */}
+            <g
+              onClick={() => setSelectedState('maharashtra')}
+              className={`cursor-pointer transition-all ${selectedState === 'maharashtra' ? 'fill-primary-600' : 'fill-primary-100'} hover:fill-primary-300`}
+            >
+              <path d="M 160 240 L 180 230 L 190 250 L 175 270 L 160 260 Z" />
+              <text x="175" y="250" textAnchor="middle" className="text-xs font-bold fill-slate-900">MH</text>
+            </g>
+
+            {/* Rajasthan */}
+            <g
+              onClick={() => setSelectedState('rajasthan')}
+              className={`cursor-pointer transition-all ${selectedState === 'rajasthan' ? 'fill-primary-600' : 'fill-primary-100'} hover:fill-primary-300`}
+            >
+              <path d="M 140 180 L 170 170 L 175 210 L 145 215 Z" />
+              <text x="155" y="195" textAnchor="middle" className="text-xs font-bold fill-slate-900">RJ</text>
+            </g>
+
+            {/* Meghalaya */}
+            <g
+              onClick={() => setSelectedState('meghalaya')}
+              className={`cursor-pointer transition-all ${selectedState === 'meghalaya' ? 'fill-primary-600' : 'fill-primary-100'} hover:fill-primary-300`}
+            >
+              <path d="M 310 200 L 330 195 L 335 215 L 315 220 Z" />
+              <text x="322" y="210" textAnchor="middle" className="text-xs font-bold fill-slate-900">ML</text>
+            </g>
+
+            {/* Chhattisgarh */}
+            <g
+              onClick={() => setSelectedState('chhattisgarh')}
+              className={`cursor-pointer transition-all ${selectedState === 'chhattisgarh' ? 'fill-primary-600' : 'fill-primary-100'} hover:fill-primary-300`}
+            >
+              <path d="M 240 280 L 270 275 L 275 310 L 245 315 Z" />
+              <text x="260" y="295" textAnchor="middle" className="text-xs font-bold fill-slate-900">CG</text>
+            </g>
+
+            {/* Legend */}
+            <text x="20" y="450" className="text-sm fill-slate-600">Click on a state to see details</text>
+          </svg>
+        </motion.div>
+
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {states.map((state, idx) => (
             <button
