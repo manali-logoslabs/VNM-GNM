@@ -1,17 +1,10 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { STATE_DATA } from '../data/states'
-import { StateCard } from '../components/Cards'
+import SimpleMap from '../components/SimpleMap'
 
 export default function StateEligibility() {
-  const [selectedState, setSelectedState] = useState(null)
-
-  const states = Object.entries(STATE_DATA).map(([key, value]) => ({
-    key,
-    data: value
-  }))
-
-  const coverageStates = ['rajasthan', 'maharashtra', 'karnataka', 'chhattisgarh', 'meghalaya']
+  const [selectedState, setSelectedState] = useState('karnataka')
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -24,29 +17,18 @@ export default function StateEligibility() {
         >
           <h1 className="text-4xl sm:text-5xl font-bold mb-4">State Eligibility & Details</h1>
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Explore VNM and GNM availability, subsidies, and regulations across Indian states.
+            Click on a state to explore VNM and GNM availability, subsidies, and regulations.
           </p>
         </motion.div>
 
-        {/* Coverage States Grid */}
+        {/* Interactive Map */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
           className="mb-16"
         >
-          <h2 className="text-3xl font-bold text-center mb-12 text-slate-900">Our Coverage States</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {states.map((state, idx) => (
-              <button
-                key={state.key}
-                onClick={() => setSelectedState(state.key)}
-                className="text-left"
-              >
-                <StateCard state={state} index={idx} />
-              </button>
-            ))}
-          </div>
+          <SimpleMap selectedState={selectedState} onStateSelect={setSelectedState} />
         </motion.div>
 
         {/* State Details */}
