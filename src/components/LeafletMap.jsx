@@ -80,12 +80,12 @@ export default function LeafletMap({ selectedState, onStateSelect }) {
 
       const layer = L.geoJSON(feature, {
         style: {
-          fillColor: selectedState === key ? '#2563eb' : isCoverage ? '#60a5fa' : '#f1f5f9',
-          fillOpacity: selectedState === key ? 0.85 : isCoverage ? 0.65 : 0.4,
-          color: selectedState === key ? '#1e40af' : isCoverage ? '#3b82f6' : '#cbd5e1',
-          weight: selectedState === key ? 2.5 : isCoverage ? 1.5 : 1,
+          fillColor: selectedState === key ? '#1e40af' : isCoverage ? '#3b82f6' : '#e2e8f0',
+          fillOpacity: selectedState === key ? 0.95 : isCoverage ? 0.8 : 0.35,
+          color: selectedState === key ? '#0c2d78' : isCoverage ? '#1e40af' : '#cbd5e1',
+          weight: selectedState === key ? 3 : isCoverage ? 2 : 0.8,
           opacity: 1,
-          dashArray: isCoverage ? '' : '2,4'
+          dashArray: ''
         },
         onEachFeature: (feature, layer) => {
           const label = stateLabels[key]
@@ -111,18 +111,18 @@ export default function LeafletMap({ selectedState, onStateSelect }) {
 
             layer.on('mouseover', function() {
               this.setStyle({
-                fillColor: '#3b82f6',
-                weight: 2,
-                fillOpacity: 0.8
+                fillColor: selectedState === key ? '#1e40af' : '#2563eb',
+                weight: selectedState === key ? 3 : 2.5,
+                fillOpacity: 0.9
               })
               this.bringToFront()
             })
 
             layer.on('mouseout', function() {
               this.setStyle({
-                fillColor: selectedState === key ? '#2563eb' : '#60a5fa',
-                weight: selectedState === key ? 2.5 : 1.5,
-                fillOpacity: selectedState === key ? 0.85 : 0.65
+                fillColor: selectedState === key ? '#1e40af' : '#3b82f6',
+                weight: selectedState === key ? 3 : 2,
+                fillOpacity: selectedState === key ? 0.95 : 0.8
               })
             })
           }
@@ -169,10 +169,10 @@ export default function LeafletMap({ selectedState, onStateSelect }) {
       const isCoverage = coverageStates.includes(key)
 
       layer.setStyle({
-        fillColor: selectedState === key ? '#2563eb' : isCoverage ? '#60a5fa' : '#f1f5f9',
-        fillOpacity: selectedState === key ? 0.85 : isCoverage ? 0.65 : 0.4,
-        color: selectedState === key ? '#1e40af' : isCoverage ? '#3b82f6' : '#cbd5e1',
-        weight: selectedState === key ? 2.5 : isCoverage ? 1.5 : 1
+        fillColor: selectedState === key ? '#1e40af' : isCoverage ? '#3b82f6' : '#e2e8f0',
+        fillOpacity: selectedState === key ? 0.95 : isCoverage ? 0.8 : 0.35,
+        color: selectedState === key ? '#0c2d78' : isCoverage ? '#1e40af' : '#cbd5e1',
+        weight: selectedState === key ? 3 : isCoverage ? 2 : 0.8
       })
 
       // Update label color
