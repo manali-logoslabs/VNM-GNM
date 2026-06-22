@@ -1,10 +1,15 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { STATE_DATA } from '../data/states'
-import SimpleMap from '../components/SimpleMap'
+import { StateCard } from '../components/Cards'
 
 export default function StateEligibility() {
-  const [selectedState, setSelectedState] = useState('karnataka')
+  const [selectedState, setSelectedState] = useState(null)
+
+  const states = Object.entries(STATE_DATA).map(([key, value]) => ({
+    key,
+    data: value
+  }))
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -17,18 +22,29 @@ export default function StateEligibility() {
         >
           <h1 className="text-4xl sm:text-5xl font-bold mb-4">State Eligibility & Details</h1>
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Click on a state to explore VNM and GNM availability, subsidies, and regulations.
+            Explore VNM and GNM availability, subsidies, and regulations across Indian states.
           </p>
         </motion.div>
 
-        {/* Interactive Map */}
+        {/* Coverage States Grid */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
           className="mb-16"
         >
-          <SimpleMap selectedState={selectedState} onStateSelect={setSelectedState} />
+          <h2 className="text-3xl font-bold text-center mb-12 text-slate-900">Our Coverage States</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {states.map((state, idx) => (
+              <button
+                key={state.key}
+                onClick={() => setSelectedState(state.key)}
+                className="text-left"
+              >
+                <StateCard state={state} index={idx} />
+              </button>
+            ))}
+          </div>
         </motion.div>
 
         {/* State Details */}
@@ -73,7 +89,7 @@ export default function StateEligibility() {
                 <ul className="space-y-2 mb-6">
                   {STATE_DATA[selectedState].highlights.map((h, idx) => (
                     <li key={idx} className="flex gap-2 text-sm text-slate-700">
-                      <span className="text-primary-600 font-bold">✓</span> {h}
+                      <span className="text-accent-600 font-bold">✓</span> {h}
                     </li>
                   ))}
                 </ul>
