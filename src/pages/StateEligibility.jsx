@@ -43,55 +43,112 @@ export default function StateEligibility() {
         >
           <h2 className="text-3xl font-bold mb-8 text-center text-slate-900">Our Coverage Across India</h2>
 
-          <div className="flex flex-col lg:flex-row gap-8 items-center justify-center max-w-6xl mx-auto">
-            {/* Interactive Map - Using Real India Map Image */}
+          <div className="flex flex-col lg:flex-row gap-12 items-center justify-center max-w-6xl mx-auto">
+            {/* Interactive SVG Map - Matching Reference Image */}
             <div className="flex-1 min-w-0">
-              <div className="relative max-w-2xl mx-auto">
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/2011_census_India_religions_map_en.svg/800px-2011_census_India_religions_map_en.svg.png"
-                  alt="India Map"
-                  className="w-full h-auto rounded-lg border-2 border-slate-200"
-                  style={{ maxWidth: '600px' }}
+              <svg viewBox="0 0 1000 1200" className="w-full h-auto" style={{ maxWidth: '600px' }}>
+                {/* Ocean/Water Background */}
+                <rect width="1000" height="1200" fill="#bfdbfe" />
+
+                {/* India Base (Cream) */}
+                <path
+                  d="M 200,150 L 350,120 L 450,100 L 550,110 L 650,90 L 750,130 L 800,200 L 850,300 L 880,400 L 900,500 L 895,600 L 880,700 L 850,800 L 800,900 L 700,1000 L 550,1100 L 350,1150 L 200,1120 L 100,1000 L 50,850 L 30,700 L 20,550 L 25,400 L 40,250 L 80,150 Z"
+                  fill="#f5e6d3"
+                  stroke="#9ca3af"
+                  strokeWidth="1.5"
                 />
-                {/* Overlay for clickable states */}
-                <div className="absolute inset-0 rounded-lg">
-                  {/* Karnataka clickable area */}
-                  <button
-                    onClick={() => setSelectedState('karnataka')}
-                    className="absolute hover:bg-green-400 hover:opacity-20 transition-opacity rounded"
-                    style={{ left: '35%', top: '60%', width: '15%', height: '20%' }}
-                    title="Karnataka"
+
+                {/* Rajasthan - Orange */}
+                <g
+                  onClick={() => setSelectedState('rajasthan')}
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                >
+                  <path
+                    d="M 200,250 L 340,220 L 400,280 L 380,450 L 300,480 L 200,380 Z"
+                    fill="#f97316"
+                    stroke="#ea580c"
+                    strokeWidth="2"
                   />
-                  {/* Maharashtra clickable area */}
-                  <button
-                    onClick={() => setSelectedState('maharashtra')}
-                    className="absolute hover:bg-blue-400 hover:opacity-20 transition-opacity rounded"
-                    style={{ left: '25%', top: '45%', width: '18%', height: '22%' }}
-                    title="Maharashtra"
+                  <text x="310" y="360" textAnchor="middle" fontSize="18" fontWeight="600" fill="#000">
+                    Rajasthan
+                  </text>
+                </g>
+
+                {/* Maharashtra - Blue */}
+                <g
+                  onClick={() => setSelectedState('maharashtra')}
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                >
+                  <path
+                    d="M 280,450 L 360,420 L 410,480 L 400,650 L 320,690 L 270,580 Z"
+                    fill="#2563eb"
+                    stroke="#1e40af"
+                    strokeWidth="2"
                   />
-                  {/* Rajasthan clickable area */}
-                  <button
-                    onClick={() => setSelectedState('rajasthan')}
-                    className="absolute hover:bg-orange-400 hover:opacity-20 transition-opacity rounded"
-                    style={{ left: '18%', top: '25%', width: '22%', height: '28%' }}
-                    title="Rajasthan"
+                  <text x="350" y="550" textAnchor="middle" fontSize="18" fontWeight="600" fill="#fff">
+                    Maharashtra
+                  </text>
+                </g>
+
+                {/* Karnataka - Green */}
+                <g
+                  onClick={() => setSelectedState('karnataka')}
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                >
+                  <path
+                    d="M 300,680 L 390,650 L 430,780 L 400,950 L 320,1000 L 270,850 Z"
+                    fill="#16a34a"
+                    stroke="#15803d"
+                    strokeWidth="2"
                   />
-                  {/* Chhattisgarh clickable area */}
-                  <button
-                    onClick={() => setSelectedState('chhattisgarh')}
-                    className="absolute hover:bg-red-400 hover:opacity-20 transition-opacity rounded"
-                    style={{ left: '42%', top: '45%', width: '18%', height: '25%' }}
-                    title="Chhattisgarh"
+                  <text x="360" y="820" textAnchor="middle" fontSize="18" fontWeight="600" fill="#fff">
+                    Karnataka
+                  </text>
+                </g>
+
+                {/* Chhattisgarh - Red */}
+                <g
+                  onClick={() => setSelectedState('chhattisgarh')}
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                >
+                  <path
+                    d="M 420,480 L 540,450 L 600,540 L 570,700 L 480,730 L 420,600 Z"
+                    fill="#dc2626"
+                    stroke="#b91c1c"
+                    strokeWidth="2"
                   />
-                  {/* Meghalaya clickable area */}
-                  <button
-                    onClick={() => setSelectedState('meghalaya')}
-                    className="absolute hover:bg-purple-400 hover:opacity-20 transition-opacity rounded"
-                    style={{ left: '60%', top: '38%', width: '12%', height: '12%' }}
-                    title="Meghalaya"
+                  <text x="530" y="600" textAnchor="middle" fontSize="18" fontWeight="600" fill="#fff">
+                    Chhattisgarh
+                  </text>
+                </g>
+
+                {/* Meghalaya - Purple */}
+                <g
+                  onClick={() => setSelectedState('meghalaya')}
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                >
+                  <path
+                    d="M 650,400 L 750,380 L 800,470 L 760,520 L 680,500 Z"
+                    fill="#a855f7"
+                    stroke="#9333ea"
+                    strokeWidth="2"
                   />
-                </div>
-              </div>
+                  <text x="730" y="460" textAnchor="middle" fontSize="16" fontWeight="600" fill="#fff">
+                    Meghalaya
+                  </text>
+                </g>
+
+                {/* Sea Labels */}
+                <text x="120" y="300" fontSize="16" fill="#0369a1" fontStyle="italic" fontWeight="500">
+                  Arabian Sea
+                </text>
+                <text x="650" y="1050" fontSize="16" fill="#0369a1" fontStyle="italic" fontWeight="500">
+                  Bay of Bengal
+                </text>
+                <text x="750" y="1200" fontSize="16" fill="#0369a1" fontStyle="italic" fontWeight="500">
+                  Indian Ocean
+                </text>
+              </svg>
             </div>
 
             {/* Legend */}
