@@ -42,7 +42,7 @@ export default function HeroSection() {
 
             {/* Headline */}
             <motion.h1 variants={itemVariants} className="text-5xl sm:text-6xl font-bold leading-tight">
-              Solar Savings <span className="gradient-text">Without the Rooftop</span>
+              Green Energy, <span className="gradient-text">Green Savings</span>
             </motion.h1>
 
             {/* Subheadline */}
@@ -151,25 +151,6 @@ export default function HeroSection() {
           </motion.div>
         </div>
 
-        {/* Live Savings Ticker */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="mt-20 bg-gradient-to-r from-accent-50 to-blue-50 rounded-xl p-6 border border-accent-200"
-        >
-          <motion.div
-            animate={{ opacity: [1, 0.7, 1] }}
-            transition={{ duration: 3, repeat: Infinity }}
-            className="text-center"
-          >
-            <p className="text-sm text-slate-600 mb-2">💰 Live Savings</p>
-            <p className="text-2xl font-bold">
-              Someone in <span className="text-primary-600">Bangalore</span> just saved{' '}
-              <span className="text-accent-600">₹6,800 this month</span>
-            </p>
-          </motion.div>
-        </motion.div>
       </div>
     </section>
   )
