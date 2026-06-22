@@ -34,62 +34,65 @@ export default function StateEligibility() {
           className="mb-12 bg-white rounded-2xl p-8 border border-slate-200"
         >
           <h2 className="text-2xl font-bold mb-6 text-center">Our Coverage Across India</h2>
-          <svg viewBox="0 0 800 900" className="w-full max-w-4xl mx-auto" style={{ height: 'auto' }}>
-            {/* India Outline */}
-            <path d="M 400 80 L 450 100 L 480 110 L 500 130 L 520 120 L 540 140 L 560 130 L 580 150 L 590 170 L 600 160 L 610 180 L 620 170 L 630 190 L 640 180 L 650 200 L 660 190 L 670 210 L 680 200 L 690 220 L 700 210 L 710 230 L 720 220 L 730 240 L 720 260 L 710 250 L 700 270 L 690 260 L 680 280 L 670 270 L 660 290 L 650 280 L 640 300 L 630 290 L 620 310 L 610 300 L 600 320 L 590 310 L 580 330 L 570 320 L 560 340 L 550 330 L 540 350 L 530 340 L 520 360 L 510 350 L 500 370 L 490 360 L 480 380 L 470 370 L 460 390 L 450 380 L 440 400 L 430 390 L 420 410 L 410 400 L 400 420 L 390 410 L 380 430 L 370 420 L 360 440 L 350 430 L 340 450 L 330 440 L 320 460 L 310 450 L 300 470 L 290 460 L 280 480 L 270 470 L 260 490 L 250 480 L 240 500 L 230 490 L 220 510 L 210 500 L 200 520 L 190 510 L 180 530 L 170 520 L 160 540 L 150 530 L 140 550 L 130 540 L 120 560 L 110 550 L 100 570 L 90 560 L 80 580 L 70 570 L 60 590 L 50 580 L 40 600 L 30 590 L 20 610 L 30 630 L 40 640 L 50 650 L 60 660 L 70 670 L 80 680 L 90 690 L 100 700 L 110 710 L 120 720 L 130 730 L 140 740 L 150 750 L 160 760 L 170 770 L 180 780 L 190 790 L 200 800 L 210 810 L 220 820 L 230 830 L 240 840 L 250 850 L 260 860 L 270 870 L 280 880 L 290 870 L 300 860 L 310 850 L 320 840 L 330 830 L 340 820 L 350 810 L 360 800 L 370 790 L 380 780 L 390 770 L 400 760 L 410 770 L 420 780 L 430 790 L 440 800 L 450 810 L 460 820 L 470 830 L 480 840 L 490 850 L 500 860 L 510 870 L 520 880 L 530 870 L 540 860 L 550 850 L 560 840 L 570 830 L 580 820 L 590 810 L 600 800 L 610 790 L 620 780 L 630 770 L 640 760 L 650 750 L 660 740 L 670 730 L 680 720 L 690 710 L 700 700 L 710 690 L 720 680 L 730 670 L 740 660 L 750 650 L 760 640 L 770 630 L 780 620 L 790 610 L 800 600 L 800 580 L 790 570 L 780 560 L 770 550 L 760 540 L 750 530 L 740 520 L 730 510 L 720 500 L 710 490 L 700 480 L 690 470 L 680 460 L 670 450 L 660 440 L 650 430 L 640 420 L 630 410 L 620 400 L 610 390 L 600 380 L 590 370 L 580 360 L 570 350 L 560 340 L 550 330 L 540 320 L 530 310 L 520 300 L 510 290 L 500 280 L 490 270 L 480 260 L 470 250 L 460 240 L 450 230 L 440 220 L 430 210 L 420 200 L 410 190 L 400 180 L 390 170 L 380 160 L 370 150 L 360 140 L 350 130 L 340 120 L 330 110 L 320 100 L 310 90 Z" fill="#e8eef8" stroke="#cbd5e1" strokeWidth="2"/>
+          <svg viewBox="0 0 950 1100" className="w-full max-w-4xl mx-auto" style={{ height: 'auto' }}>
+            {/* India Outline - Proper coastline and borders */}
+            <g fill="#f0f4f8" stroke="#94a3b8" strokeWidth="1.5">
+              {/* Main India body */}
+              <path d="M 280,150 L 320,140 L 360,145 L 400,140 L 450,145 L 500,140 L 550,150 L 600,145 L 650,155 L 700,150 L 750,165 L 800,170 L 850,180 L 880,200 L 900,230 L 920,260 L 930,300 L 940,350 L 945,400 L 950,450 L 948,500 L 945,550 L 940,600 L 935,650 L 930,700 L 920,750 L 900,800 L 880,850 L 850,900 L 800,930 L 750,950 L 700,960 L 650,965 L 600,970 L 550,975 L 500,978 L 450,980 L 400,982 L 350,980 L 300,978 L 250,975 L 200,970 L 150,960 L 100,945 L 70,920 L 50,880 L 40,840 L 35,800 L 32,750 L 30,700 L 28,650 L 25,600 L 22,550 L 20,500 L 18,450 L 15,400 L 12,350 L 10,300 L 8,250 L 10,200 L 15,160 L 30,140 L 60,130 L 100,125 L 150,130 L 200,135 L 250,140 Z" />
+            </g>
 
-            {/* Rajasthan (RJ) - Northwestern */}
+            {/* Rajasthan (RJ) - Northwestern India */}
             <g
               onClick={() => setSelectedState('rajasthan')}
-              className={`cursor-pointer transition-all ${selectedState === 'rajasthan' ? 'fill-primary-600' : 'fill-primary-300'} hover:fill-primary-500`}
-              style={{ stroke: '#1e40af', strokeWidth: 2 }}
+              className={`cursor-pointer transition-all ${selectedState === 'rajasthan' ? 'fill-primary-600' : 'fill-primary-400'} hover:fill-primary-500`}
+              style={{ stroke: '#1e40af', strokeWidth: 2.5 }}
             >
-              <path d="M 150 150 L 220 140 L 240 180 L 260 200 L 250 250 L 200 270 L 160 240 L 140 200 Z" />
-              <text x="200" y="210" textAnchor="middle" className="text-xl font-bold fill-white pointer-events-none">RJ</text>
+              <path d="M 200,250 L 280,230 L 340,240 L 360,320 L 320,380 L 240,370 L 180,300 Z" />
+              <text x="285" y="315" textAnchor="middle" className="text-2xl font-bold fill-white pointer-events-none">RJ</text>
             </g>
 
-            {/* Maharashtra (MH) - Western */}
+            {/* Maharashtra (MH) - Western India */}
             <g
               onClick={() => setSelectedState('maharashtra')}
-              className={`cursor-pointer transition-all ${selectedState === 'maharashtra' ? 'fill-primary-600' : 'fill-primary-300'} hover:fill-primary-500`}
-              style={{ stroke: '#1e40af', strokeWidth: 2 }}
+              className={`cursor-pointer transition-all ${selectedState === 'maharashtra' ? 'fill-primary-600' : 'fill-primary-400'} hover:fill-primary-500`}
+              style={{ stroke: '#1e40af', strokeWidth: 2.5 }}
             >
-              <path d="M 200 270 L 250 250 L 280 300 L 290 380 L 260 420 L 220 400 L 200 350 Z" />
-              <text x="245" y="340" textAnchor="middle" className="text-xl font-bold fill-white pointer-events-none">MH</text>
+              <path d="M 240,370 L 320,380 L 360,460 L 380,550 L 340,600 L 280,580 L 250,480 Z" />
+              <text x="310" y="475" textAnchor="middle" className="text-2xl font-bold fill-white pointer-events-none">MH</text>
             </g>
 
-            {/* Karnataka (KA) - Southwestern */}
+            {/* Karnataka (KA) - Southwestern India */}
             <g
               onClick={() => setSelectedState('karnataka')}
-              className={`cursor-pointer transition-all ${selectedState === 'karnataka' ? 'fill-primary-600' : 'fill-primary-300'} hover:fill-primary-500`}
-              style={{ stroke: '#1e40af', strokeWidth: 2 }}
+              className={`cursor-pointer transition-all ${selectedState === 'karnataka' ? 'fill-primary-600' : 'fill-primary-400'} hover:fill-primary-500`}
+              style={{ stroke: '#1e40af', strokeWidth: 2.5 }}
             >
-              <path d="M 220 400 L 260 420 L 290 480 L 280 560 L 240 580 L 200 540 L 190 480 Z" />
-              <text x="245" y="490" textAnchor="middle" className="text-xl font-bold fill-white pointer-events-none">KA</text>
+              <path d="M 280,580 L 340,600 L 360,700 L 340,800 L 280,820 L 250,750 L 260,650 Z" />
+              <text x="310" y="710" textAnchor="middle" className="text-2xl font-bold fill-white pointer-events-none">KA</text>
             </g>
 
-            {/* Chhattisgarh (CG) - Central */}
+            {/* Chhattisgarh (CG) - Central India */}
             <g
               onClick={() => setSelectedState('chhattisgarh')}
-              className={`cursor-pointer transition-all ${selectedState === 'chhattisgarh' ? 'fill-primary-600' : 'fill-primary-300'} hover:fill-primary-500`}
-              style={{ stroke: '#1e40af', strokeWidth: 2 }}
+              className={`cursor-pointer transition-all ${selectedState === 'chhattisgarh' ? 'fill-primary-600' : 'fill-primary-400'} hover:fill-primary-500`}
+              style={{ stroke: '#1e40af', strokeWidth: 2.5 }}
             >
-              <path d="M 320 300 L 380 280 L 420 320 L 410 400 L 350 420 L 310 380 Z" />
-              <text x="365" y="360" textAnchor="middle" className="text-xl font-bold fill-white pointer-events-none">CG</text>
+              <path d="M 400,400 L 480,390 L 540,420 L 530,540 L 460,560 L 390,520 Z" />
+              <text x="470" y="475" textAnchor="middle" className="text-2xl font-bold fill-white pointer-events-none">CG</text>
             </g>
 
-            {/* Meghalaya (ML) - Northeastern */}
+            {/* Meghalaya (ML) - Northeastern India */}
             <g
               onClick={() => setSelectedState('meghalaya')}
-              className={`cursor-pointer transition-all ${selectedState === 'meghalaya' ? 'fill-primary-600' : 'fill-primary-300'} hover:fill-primary-500`}
-              style={{ stroke: '#1e40af', strokeWidth: 2 }}
+              className={`cursor-pointer transition-all ${selectedState === 'meghalaya' ? 'fill-primary-600' : 'fill-primary-400'} hover:fill-primary-500`}
+              style={{ stroke: '#1e40af', strokeWidth: 2.5 }}
             >
-              <path d="M 600 250 L 650 240 L 680 280 L 660 320 L 620 310 Z" />
-              <text x="650" y="285" textAnchor="middle" className="text-lg font-bold fill-white pointer-events-none">ML</text>
+              <path d="M 700,320 L 760,310 L 800,350 L 780,400 L 720,390 Z" />
+              <text x="760" y="360" textAnchor="middle" className="text-xl font-bold fill-white pointer-events-none">ML</text>
             </g>
 
             {/* Legend */}
-            <text x="50" y="850" className="text-lg font-semibold fill-slate-900">Click on a state to see details</text>
+            <text x="80" y="1050" className="text-lg font-semibold fill-slate-900">Click on a state to see details</text>
           </svg>
         </motion.div>
 
