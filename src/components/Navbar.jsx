@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Zap } from 'lucide-react'
+import { Menu, X, Zap, Send } from 'lucide-react'
+import ChatModal from './ChatModal'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [showChat, setShowChat] = useState(false)
   const location = useLocation()
   const isLandingPage = location.pathname === '/'
 
@@ -52,7 +54,7 @@ export default function Navbar() {
                 <Zap className="w-6 h-6 text-white" />
               </div>
               <span className="font-bold text-lg hidden sm:block text-slate-900 group-hover:text-accent-600 transition-colors">
-                green house
+                Green <span className="text-accent-600">House</span>
               </span>
             </Link>
 
@@ -87,6 +89,7 @@ export default function Navbar() {
                 Calculate
               </Link>
               <button
+                onClick={() => setShowChat(true)}
                 className="btn-ghost text-sm"
                 title="Chat with AI Assistant"
               >
@@ -145,6 +148,10 @@ export default function Navbar() {
                     Calculate Savings
                   </Link>
                   <button
+                    onClick={() => {
+                      setShowChat(true)
+                      setIsOpen(false)
+                    }}
                     className="btn-ghost w-full justify-center text-sm"
                     title="Chat with AI Assistant"
                   >
@@ -159,6 +166,9 @@ export default function Navbar() {
 
       {/* Spacer */}
       <div className="h-20" />
+
+      {/* Chat Modal */}
+      <ChatModal isOpen={showChat} onClose={() => setShowChat(false)} />
     </>
   )
 }
