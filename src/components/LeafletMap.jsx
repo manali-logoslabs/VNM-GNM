@@ -7,19 +7,68 @@ export default function LeafletMap({ selectedState, onStateSelect }) {
   const mapRef = useRef(null)
   const mapInstanceRef = useRef(null)
   const layersRef = useRef({})
+  const labelsRef = useRef({})
 
   const coverageStates = ['rajasthan', 'maharashtra', 'karnataka', 'chhattisgarh', 'meghalaya']
+
+  const stateLabels = {
+    rajasthan: 'RJ',
+    maharashtra: 'MH',
+    karnataka: 'KA',
+    chhattisgarh: 'CG',
+    meghalaya: 'ML',
+    punjab: 'PB',
+    haryana: 'HR',
+    uttar_pradesh: 'UP',
+    bihar: 'BR',
+    west_bengal: 'WB',
+    odisha: 'OD',
+    andhra_pradesh: 'AP',
+    telangana: 'TG',
+    tamil_nadu: 'TN',
+    kerala: 'KL',
+    gujarat: 'GJ',
+    goa: 'GA'
+  }
+
+  const getStateCentroid = (key) => {
+    const centroids = {
+      rajasthan: [27.5, 74],
+      maharashtra: [19.3, 75.7],
+      karnataka: [15.3, 75.8],
+      chhattisgarh: [22, 82.5],
+      meghalaya: [25.5, 91.8],
+      punjab: [31.8, 74.8],
+      haryana: [29.5, 77.5],
+      uttar_pradesh: [27, 80.5],
+      bihar: [26, 85.5],
+      west_bengal: [25.5, 88.5],
+      odisha: [20.5, 86],
+      andhra_pradesh: [15.7, 79.5],
+      telangana: [16.5, 78.5],
+      tamil_nadu: [11, 78.5],
+      kerala: [10.5, 75.5],
+      gujarat: [22, 72],
+      goa: [15.2, 73.8]
+    }
+    return centroids[key] || [20, 78]
+  }
 
   useEffect(() => {
     if (!mapRef.current) return
 
-    // Initialize map
-    const map = L.map(mapRef.current).setView([23, 82], 4)
+    // Initialize map with better settings
+    const map = L.map(mapRef.current, {
+      zoomControl: true,
+      scrollWheelZoom: true,
+      dragging: true
+    }).setView([23, 82], 5)
 
-    // Add tile layer
+    // Add tile layer with light style
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
-      maxZoom: 19
+      maxZoom: 10,
+      minZoom: 4
     }).addTo(map)
 
     mapInstanceRef.current = map
@@ -31,29 +80,49 @@ export default function LeafletMap({ selectedState, onStateSelect }) {
 
       const layer = L.geoJSON(feature, {
         style: {
-          fillColor: selectedState === key ? '#1e40af' : isCoverage ? '#60a5fa' : '#e2e8f0',
-          fillOpacity: selectedState === key ? 0.9 : isCoverage ? 0.7 : 0.5,
-          color: selectedState === key ? '#1e40af' : '#cbd5e1',
-          weight: selectedState === key ? 3 : 1.5,
-          opacity: 1
+          fillColor: selectedState === key ? '#2563eb' : isCoverage ? '#60a5fa' : '#f1f5f9',
+          fillOpacity: selectedState === key ? 0.85 : isCoverage ? 0.65 : 0.4,
+          color: selectedState === key ? '#1e40af' : isCoverage ? '#3b82f6' : '#cbd5e1',
+          weight: selectedState === key ? 2.5 : isCoverage ? 1.5 : 1,
+          opacity: 1,
+          dashArray: isCoverage ? '' : '2,4'
         },
         onEachFeature: (feature, layer) => {
-          layer.bindPopup(`<b>${feature.properties.name}</b>`)
+          const label = stateLabels[key]
+
+          // Create custom popup
+          const popupContent = `
+            <div style="padding: 8px; font-family: sans-serif;">
+              <h4 style="margin: 0 0 4px 0; color: #1e40af; font-size: 14px;">${feature.properties.name}</h4>
+              <p style="margin: 0; color: #64748b; font-size: 12px;">${isCoverage ? '✓ Coverage State' : 'Other State'}</p>
+            </div>
+          `
+
+          layer.bindPopup(popupContent, {
+            maxWidth: 200,
+            className: 'custom-popup'
+          })
 
           if (isCoverage) {
-            layer.on('click', () => {
+            layer.on('click', (e) => {
+              L.DomEvent.stopPropagation(e)
               onStateSelect(key)
             })
+
             layer.on('mouseover', function() {
               this.setStyle({
                 fillColor: '#3b82f6',
-                weight: 2.5
+                weight: 2,
+                fillOpacity: 0.8
               })
+              this.bringToFront()
             })
+
             layer.on('mouseout', function() {
               this.setStyle({
-                fillColor: selectedState === key ? '#1e40af' : '#60a5fa',
-                weight: selectedState === key ? 3 : 1.5
+                fillColor: selectedState === key ? '#2563eb' : '#60a5fa',
+                weight: selectedState === key ? 2.5 : 1.5,
+                fillOpacity: selectedState === key ? 0.85 : 0.65
               })
             })
           }
@@ -61,6 +130,28 @@ export default function LeafletMap({ selectedState, onStateSelect }) {
       }).addTo(map)
 
       layersRef.current[key] = layer
+
+      // Add state labels
+      const [lat, lng] = getStateCentroid(key)
+      const labelClass = isCoverage ? 'state-label-coverage' : 'state-label-other'
+
+      const label = L.marker([lat, lng], {
+        icon: L.divIcon({
+          html: `<div class="${labelClass}" style="
+            font-weight: ${isCoverage ? '900' : '600'};
+            color: ${selectedState === key ? '#fff' : isCoverage ? '#fff' : '#64748b'};
+            font-size: ${isCoverage ? '14px' : '11px'};
+            text-shadow: ${selectedState === key || isCoverage ? '0 1px 3px rgba(0,0,0,0.4)' : 'none'};
+            pointer-events: none;
+            text-align: center;
+          ">${stateLabels[key]}</div>`,
+          iconSize: [35, 35],
+          className: 'label-icon'
+        }),
+        interactive: false
+      }).addTo(map)
+
+      labelsRef.current[key] = label
     })
 
     return () => {
@@ -74,13 +165,31 @@ export default function LeafletMap({ selectedState, onStateSelect }) {
 
     Object.keys(layersRef.current).forEach((key) => {
       const layer = layersRef.current[key]
+      const labelMarker = labelsRef.current[key]
       const isCoverage = coverageStates.includes(key)
 
       layer.setStyle({
-        fillColor: selectedState === key ? '#1e40af' : isCoverage ? '#60a5fa' : '#e2e8f0',
-        fillOpacity: selectedState === key ? 0.9 : isCoverage ? 0.7 : 0.5,
-        weight: selectedState === key ? 3 : 1.5
+        fillColor: selectedState === key ? '#2563eb' : isCoverage ? '#60a5fa' : '#f1f5f9',
+        fillOpacity: selectedState === key ? 0.85 : isCoverage ? 0.65 : 0.4,
+        color: selectedState === key ? '#1e40af' : isCoverage ? '#3b82f6' : '#cbd5e1',
+        weight: selectedState === key ? 2.5 : isCoverage ? 1.5 : 1
       })
+
+      // Update label color
+      if (labelMarker) {
+        const icon = labelMarker.getIcon()
+        const newHtml = `<div style="
+          font-weight: ${isCoverage ? '900' : '600'};
+          color: ${selectedState === key ? '#fff' : isCoverage ? '#fff' : '#64748b'};
+          font-size: ${isCoverage ? '14px' : '11px'};
+          text-shadow: ${selectedState === key || isCoverage ? '0 1px 3px rgba(0,0,0,0.4)' : 'none'};
+          pointer-events: none;
+          text-align: center;
+        ">${stateLabels[key]}</div>`
+
+        icon.options.html = newHtml
+        labelMarker.setIcon(icon)
+      }
     })
   }, [selectedState])
 
@@ -88,11 +197,13 @@ export default function LeafletMap({ selectedState, onStateSelect }) {
     <div
       ref={mapRef}
       style={{
-        height: '500px',
-        borderRadius: '12px',
-        border: '1px solid #e2e8f0',
-        overflow: 'hidden'
+        height: '600px',
+        borderRadius: '16px',
+        border: '2px solid #e2e8f0',
+        overflow: 'hidden',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.07)'
       }}
+      className="map-container"
     />
   )
 }
