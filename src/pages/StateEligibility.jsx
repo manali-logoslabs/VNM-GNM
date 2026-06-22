@@ -34,66 +34,57 @@ export default function StateEligibility() {
           className="mb-12 bg-white rounded-2xl p-8 border border-slate-200"
         >
           <h2 className="text-2xl font-bold mb-6 text-center">Our Coverage Across India</h2>
-          <svg viewBox="0 0 950 1100" className="w-full max-w-4xl mx-auto" style={{ height: 'auto' }}>
-            {/* India Outline - Proper coastline and borders */}
-            <g fill="#f0f4f8" stroke="#94a3b8" strokeWidth="1.5">
-              {/* Main India body */}
-              <path d="M 280,150 L 320,140 L 360,145 L 400,140 L 450,145 L 500,140 L 550,150 L 600,145 L 650,155 L 700,150 L 750,165 L 800,170 L 850,180 L 880,200 L 900,230 L 920,260 L 930,300 L 940,350 L 945,400 L 950,450 L 948,500 L 945,550 L 940,600 L 935,650 L 930,700 L 920,750 L 900,800 L 880,850 L 850,900 L 800,930 L 750,950 L 700,960 L 650,965 L 600,970 L 550,975 L 500,978 L 450,980 L 400,982 L 350,980 L 300,978 L 250,975 L 200,970 L 150,960 L 100,945 L 70,920 L 50,880 L 40,840 L 35,800 L 32,750 L 30,700 L 28,650 L 25,600 L 22,550 L 20,500 L 18,450 L 15,400 L 12,350 L 10,300 L 8,250 L 10,200 L 15,160 L 30,140 L 60,130 L 100,125 L 150,130 L 200,135 L 250,140 Z" />
-            </g>
 
-            {/* Rajasthan (RJ) - Northwestern India */}
-            <g
-              onClick={() => setSelectedState('rajasthan')}
-              className={`cursor-pointer transition-all ${selectedState === 'rajasthan' ? 'fill-primary-600' : 'fill-primary-400'} hover:fill-primary-500`}
-              style={{ stroke: '#1e40af', strokeWidth: 2.5 }}
-            >
-              <path d="M 200,250 L 280,230 L 340,240 L 360,320 L 320,380 L 240,370 L 180,300 Z" />
-              <text x="285" y="315" textAnchor="middle" className="text-2xl font-bold fill-white pointer-events-none">RJ</text>
-            </g>
+          {/* Map Container with Background Image */}
+          <div className="relative max-w-4xl mx-auto bg-slate-100 rounded-xl overflow-hidden" style={{ aspectRatio: '1.2/1' }}>
+            {/* India Map Background */}
+            <svg viewBox="0 0 1200 900" className="w-full h-full absolute inset-0" style={{ backgroundImage: `linear-gradient(135deg, #f0f4f8 0%, #e0e7ff 100%)` }}>
+              {/* Simplified India outline with better proportions */}
+              <defs>
+                <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feDropShadow dx="1" dy="1" stdDeviation="2" floodOpacity="0.15"/>
+                </filter>
+              </defs>
 
-            {/* Maharashtra (MH) - Western India */}
-            <g
-              onClick={() => setSelectedState('maharashtra')}
-              className={`cursor-pointer transition-all ${selectedState === 'maharashtra' ? 'fill-primary-600' : 'fill-primary-400'} hover:fill-primary-500`}
-              style={{ stroke: '#1e40af', strokeWidth: 2.5 }}
-            >
-              <path d="M 240,370 L 320,380 L 360,460 L 380,550 L 340,600 L 280,580 L 250,480 Z" />
-              <text x="310" y="475" textAnchor="middle" className="text-2xl font-bold fill-white pointer-events-none">MH</text>
-            </g>
+              {/* India Body - Simplified but recognizable */}
+              <path d="M 350,120 Q 420,100 480,110 Q 550,120 620,100 Q 680,90 750,110 Q 820,130 880,150 L 920,200 Q 950,250 960,320 Q 970,400 970,480 Q 965,560 950,640 Q 920,750 850,820 Q 750,900 600,920 Q 450,930 300,920 Q 150,910 80,820 Q 30,750 20,640 Q 10,560 5,480 Q 0,400 10,320 Q 20,250 50,200 L 90,150 Q 150,130 220,120 Q 280,110 350,120 Z" fill="#e8eef8" stroke="#cbd5e1" strokeWidth="2" filter="url(#shadow)"/>
 
-            {/* Karnataka (KA) - Southwestern India */}
-            <g
-              onClick={() => setSelectedState('karnataka')}
-              className={`cursor-pointer transition-all ${selectedState === 'karnataka' ? 'fill-primary-600' : 'fill-primary-400'} hover:fill-primary-500`}
-              style={{ stroke: '#1e40af', strokeWidth: 2.5 }}
-            >
-              <path d="M 280,580 L 340,600 L 360,700 L 340,800 L 280,820 L 250,750 L 260,650 Z" />
-              <text x="310" y="710" textAnchor="middle" className="text-2xl font-bold fill-white pointer-events-none">KA</text>
-            </g>
+              {/* Rajasthan - Northwestern */}
+              <g onClick={() => setSelectedState('rajasthan')} className={`cursor-pointer transition-all ${selectedState === 'rajasthan' ? 'fill-primary-600' : 'fill-primary-400'} hover:fill-primary-500`} style={{ stroke: '#1e40af', strokeWidth: 3 }}>
+                <path d="M 320,200 L 420,180 L 480,220 L 500,320 L 440,380 L 340,360 L 300,280 Z" />
+                <text x="410" y="285" textAnchor="middle" dominantBaseline="middle" className="text-3xl font-bold fill-white pointer-events-none" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>RJ</text>
+              </g>
 
-            {/* Chhattisgarh (CG) - Central India */}
-            <g
-              onClick={() => setSelectedState('chhattisgarh')}
-              className={`cursor-pointer transition-all ${selectedState === 'chhattisgarh' ? 'fill-primary-600' : 'fill-primary-400'} hover:fill-primary-500`}
-              style={{ stroke: '#1e40af', strokeWidth: 2.5 }}
-            >
-              <path d="M 400,400 L 480,390 L 540,420 L 530,540 L 460,560 L 390,520 Z" />
-              <text x="470" y="475" textAnchor="middle" className="text-2xl font-bold fill-white pointer-events-none">CG</text>
-            </g>
+              {/* Maharashtra - Western */}
+              <g onClick={() => setSelectedState('maharashtra')} className={`cursor-pointer transition-all ${selectedState === 'maharashtra' ? 'fill-primary-600' : 'fill-primary-400'} hover:fill-primary-500`} style={{ stroke: '#1e40af', strokeWidth: 3 }}>
+                <path d="M 340,360 L 440,380 L 480,470 L 510,600 L 460,660 L 380,620 L 350,480 Z" />
+                <text x="430" y="520" textAnchor="middle" dominantBaseline="middle" className="text-3xl font-bold fill-white pointer-events-none" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>MH</text>
+              </g>
 
-            {/* Meghalaya (ML) - Northeastern India */}
-            <g
-              onClick={() => setSelectedState('meghalaya')}
-              className={`cursor-pointer transition-all ${selectedState === 'meghalaya' ? 'fill-primary-600' : 'fill-primary-400'} hover:fill-primary-500`}
-              style={{ stroke: '#1e40af', strokeWidth: 2.5 }}
-            >
-              <path d="M 700,320 L 760,310 L 800,350 L 780,400 L 720,390 Z" />
-              <text x="760" y="360" textAnchor="middle" className="text-xl font-bold fill-white pointer-events-none">ML</text>
-            </g>
+              {/* Karnataka - Southwestern */}
+              <g onClick={() => setSelectedState('karnataka')} className={`cursor-pointer transition-all ${selectedState === 'karnataka' ? 'fill-primary-600' : 'fill-primary-400'} hover:fill-primary-500`} style={{ stroke: '#1e40af', strokeWidth: 3 }}>
+                <path d="M 380,620 L 460,660 L 480,760 L 450,850 L 380,870 L 340,780 L 350,680 Z" />
+                <text x="410" y="755" textAnchor="middle" dominantBaseline="middle" className="text-3xl font-bold fill-white pointer-events-none" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>KA</text>
+              </g>
 
-            {/* Legend */}
-            <text x="80" y="1050" className="text-lg font-semibold fill-slate-900">Click on a state to see details</text>
-          </svg>
+              {/* Chhattisgarh - Central */}
+              <g onClick={() => setSelectedState('chhattisgarh')} className={`cursor-pointer transition-all ${selectedState === 'chhattisgarh' ? 'fill-primary-600' : 'fill-primary-400'} hover:fill-primary-500`} style={{ stroke: '#1e40af', strokeWidth: 3 }}>
+                <path d="M 520,350 L 620,320 L 700,380 L 680,520 L 600,560 L 520,500 Z" />
+                <text x="620" y="440" textAnchor="middle" dominantBaseline="middle" className="text-3xl font-bold fill-white pointer-events-none" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>CG</text>
+              </g>
+
+              {/* Meghalaya - Northeastern */}
+              <g onClick={() => setSelectedState('meghalaya')} className={`cursor-pointer transition-all ${selectedState === 'meghalaya' ? 'fill-primary-600' : 'fill-primary-400'} hover:fill-primary-500`} style={{ stroke: '#1e40af', strokeWidth: 3 }}>
+                <path d="M 800,260 L 870,240 L 920,310 L 880,380 L 810,360 Z" />
+                <text x="860" y="305" textAnchor="middle" dominantBaseline="middle" className="text-2xl font-bold fill-white pointer-events-none" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>ML</text>
+              </g>
+            </svg>
+
+            {/* Overlay Text */}
+            <div className="absolute inset-0 flex items-end justify-start p-6 pointer-events-none">
+              <p className="text-sm font-semibold text-slate-600 bg-white bg-opacity-80 px-3 py-2 rounded pointer-events-auto">Click on a state to see details</p>
+            </div>
+          </div>
         </motion.div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
