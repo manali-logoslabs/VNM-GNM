@@ -70,7 +70,7 @@ export default function ChatModal({ isOpen, onClose }) {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed inset-4 md:bottom-4 md:right-4 md:top-auto md:left-auto md:w-full md:max-w-md bg-white rounded-2xl shadow-2xl z-50 flex flex-col"
+            className="fixed inset-4 md:inset-auto md:bottom-4 md:right-4 md:w-96 bg-white rounded-2xl shadow-2xl z-50 flex flex-col max-h-[90vh] md:max-h-[600px]"
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-primary-600 to-primary-700 text-white p-4 rounded-t-2xl flex items-center justify-between">
