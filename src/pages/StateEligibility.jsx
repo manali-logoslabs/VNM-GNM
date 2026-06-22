@@ -42,46 +42,46 @@ export default function StateEligibility() {
             {/* Karnataka */}
             <g
               onClick={() => setSelectedState('karnataka')}
-              className={`cursor-pointer transition-all ${selectedState === 'karnataka' ? 'fill-primary-600' : 'fill-primary-100'} hover:fill-primary-300`}
+              className={`cursor-pointer transition-all stroke-primary-400 stroke-2 ${selectedState === 'karnataka' ? 'fill-primary-600' : 'fill-primary-200'} hover:fill-primary-400`}
             >
               <path d="M 180 280 L 200 270 L 210 290 L 200 310 L 180 305 Z" />
-              <text x="190" y="295" textAnchor="middle" className="text-xs font-bold fill-slate-900">KA</text>
+              <text x="190" y="295" textAnchor="middle" className="text-sm font-bold fill-slate-900">KA</text>
             </g>
 
             {/* Maharashtra */}
             <g
               onClick={() => setSelectedState('maharashtra')}
-              className={`cursor-pointer transition-all ${selectedState === 'maharashtra' ? 'fill-primary-600' : 'fill-primary-100'} hover:fill-primary-300`}
+              className={`cursor-pointer transition-all stroke-primary-400 stroke-2 ${selectedState === 'maharashtra' ? 'fill-primary-600' : 'fill-primary-200'} hover:fill-primary-400`}
             >
               <path d="M 160 240 L 180 230 L 190 250 L 175 270 L 160 260 Z" />
-              <text x="175" y="250" textAnchor="middle" className="text-xs font-bold fill-slate-900">MH</text>
+              <text x="175" y="250" textAnchor="middle" className="text-sm font-bold fill-slate-900">MH</text>
             </g>
 
             {/* Rajasthan */}
             <g
               onClick={() => setSelectedState('rajasthan')}
-              className={`cursor-pointer transition-all ${selectedState === 'rajasthan' ? 'fill-primary-600' : 'fill-primary-100'} hover:fill-primary-300`}
+              className={`cursor-pointer transition-all stroke-primary-400 stroke-2 ${selectedState === 'rajasthan' ? 'fill-primary-600' : 'fill-primary-200'} hover:fill-primary-400`}
             >
               <path d="M 140 180 L 170 170 L 175 210 L 145 215 Z" />
-              <text x="155" y="195" textAnchor="middle" className="text-xs font-bold fill-slate-900">RJ</text>
+              <text x="155" y="195" textAnchor="middle" className="text-sm font-bold fill-slate-900">RJ</text>
             </g>
 
             {/* Meghalaya */}
             <g
               onClick={() => setSelectedState('meghalaya')}
-              className={`cursor-pointer transition-all ${selectedState === 'meghalaya' ? 'fill-primary-600' : 'fill-primary-100'} hover:fill-primary-300`}
+              className={`cursor-pointer transition-all stroke-primary-400 stroke-2 ${selectedState === 'meghalaya' ? 'fill-primary-600' : 'fill-primary-200'} hover:fill-primary-400`}
             >
               <path d="M 310 200 L 330 195 L 335 215 L 315 220 Z" />
-              <text x="322" y="210" textAnchor="middle" className="text-xs font-bold fill-slate-900">ML</text>
+              <text x="322" y="210" textAnchor="middle" className="text-sm font-bold fill-slate-900">ML</text>
             </g>
 
             {/* Chhattisgarh */}
             <g
               onClick={() => setSelectedState('chhattisgarh')}
-              className={`cursor-pointer transition-all ${selectedState === 'chhattisgarh' ? 'fill-primary-600' : 'fill-primary-100'} hover:fill-primary-300`}
+              className={`cursor-pointer transition-all stroke-primary-400 stroke-2 ${selectedState === 'chhattisgarh' ? 'fill-primary-600' : 'fill-primary-200'} hover:fill-primary-400`}
             >
               <path d="M 240 280 L 270 275 L 275 310 L 245 315 Z" />
-              <text x="260" y="295" textAnchor="middle" className="text-xs font-bold fill-slate-900">CG</text>
+              <text x="260" y="295" textAnchor="middle" className="text-sm font-bold fill-slate-900">CG</text>
             </g>
 
             {/* Legend */}
