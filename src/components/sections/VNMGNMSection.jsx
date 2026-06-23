@@ -181,10 +181,10 @@ export default function VNMGNMSection() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="bg-gradient-to-r from-primary-50 to-blue-50 rounded-xl p-8 text-center mb-12 border border-primary-200"
+          className="bg-gradient-to-r from-primary-50 to-blue-50 rounded-xl p-6 text-center mb-8 border border-primary-200"
         >
-          <p className="text-slate-600 mb-2">Typical Annual Savings</p>
-          <p className="text-3xl font-bold text-primary-600 mb-4">{data.savings}</p>
+          <p className="text-slate-600 mb-3">Typical Annual Savings</p>
+          <p className="text-3xl sm:text-4xl font-bold text-primary-600 mb-4">{data.savings}</p>
           <Link to={data.link} className="btn-primary">
             Learn More
           </Link>

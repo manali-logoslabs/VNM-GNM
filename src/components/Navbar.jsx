@@ -23,7 +23,7 @@ export default function Navbar() {
     { label: 'How It Works', href: '#vnm-gnm', path: '/vnm' },
     { label: 'Coverage', href: '#coverage', path: '/states' },
     { label: 'Success Stories', href: '#stories', path: '/case-studies' },
-    { label: 'FAQ', href: '#faq', path: '/faq' },
+    { label: 'FAQ', href: null, path: '/faq' },
   ]
 
   const handleNavClick = (e, href) => {
@@ -50,7 +50,7 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 group">
-              <div className="w-10 h-10 bg-gradient-to-br from-accent-600 to-accent-700 rounded-lg flex items-center justify-center group-hover:shadow-glow transition-shadow">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-primary-700 rounded-lg flex items-center justify-center group-hover:shadow-glow transition-shadow">
                 <Zap className="w-6 h-6 text-white" />
               </div>
               <span className="font-bold text-lg hidden sm:block text-slate-900 group-hover:text-accent-600 transition-colors">

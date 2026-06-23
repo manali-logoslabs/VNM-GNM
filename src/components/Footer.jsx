@@ -14,7 +14,7 @@ export default function Footer() {
               <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
                 <Zap className="w-5 h-5 text-white" />
               </div>
-              <h3 className="font-bold text-lg text-white">VNM | GNM</h3>
+              <h3 className="font-bold text-lg text-white">Green <span className="text-accent-400">House</span></h3>
             </div>
             <p className="text-slate-400 text-sm mb-6">
               Helping communities and businesses reduce electricity bills through shared solar energy solutions.
