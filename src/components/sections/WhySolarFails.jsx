@@ -89,7 +89,7 @@ export default function WhySolarFails() {
           viewport={{ once: true }}
           className="text-center bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl p-8 text-white"
         >
-          <h3 className="text-2xl font-bold mb-4">There\'s a Better Way</h3>
+          <h3 className="text-2xl font-bold mb-4">There's a Better Way</h3>
           <p className="text-lg mb-6 text-primary-100">
             Virtual Net Metering (VNM) and Group Net Metering (GNM) let you enjoy solar benefits without the hassles.
           </p>
