@@ -14,7 +14,7 @@ export default function Footer() {
               <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
                 <Zap className="w-5 h-5 text-white" />
               </div>
-              <h3 className="font-bold text-lg text-white">Green <span className="text-accent-400">House</span></h3>
+              <h3 className="font-bold text-lg text-white">Green House</h3>
             </div>
             <p className="text-slate-400 text-sm mb-6">
               Helping communities and businesses reduce electricity bills through shared solar energy solutions.
@@ -97,7 +97,7 @@ export default function Footer() {
               <li className="flex gap-3">
                 <Mail className="w-4 h-4 text-primary-400 flex-shrink-0 mt-0.5" />
                 <a href="mailto:hello@vnm-gnm.co" className="text-slate-400 hover:text-primary-400 transition-colors">
-                  hello@vnm-gnm.co
+                  hello@greenhouse.co
                 </a>
               </li>
               <li className="flex gap-3">
@@ -112,7 +112,7 @@ export default function Footer() {
         <div className="border-t border-slate-800 pt-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-slate-400">
             <div>
-              © {currentYear} VNM | GNM Solar. All rights reserved.
+              © {currentYear} Green House Solar. All rights reserved.
             </div>
             <div className="flex gap-6 justify-start sm:justify-end">
               <a href="#" className="hover:text-primary-400 transition-colors">
