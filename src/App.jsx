@@ -9,7 +9,6 @@ import Calculator from './pages/Calculator'
 import Eligibility from './pages/Eligibility'
 import StateEligibility from './pages/StateEligibility'
 import CaseStudies from './pages/CaseStudies'
-import FAQ from './pages/FAQ'
 import Contact from './pages/Contact'
 
 export default function App() {
@@ -27,7 +26,6 @@ export default function App() {
             <Route path="/eligibility" element={<Eligibility />} />
             <Route path="/states" element={<StateEligibility />} />
             <Route path="/case-studies" element={<CaseStudies />} />
-            <Route path="/faq" element={<FAQ />} />
             <Route path="/contact" element={<Contact />} />
           </Routes>
         </main>

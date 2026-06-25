@@ -20,20 +20,10 @@ export default function Navbar() {
   }, [])
 
   const navLinks = [
-    { label: 'How It Works', href: '#vnm-gnm', path: '/vnm' },
-    { label: 'Coverage', href: '#coverage', path: '/states' },
-    { label: 'Success Stories', href: '#stories', path: '/case-studies' },
-    { label: 'FAQ', href: null, path: '/faq' },
+    { label: 'How It Works', path: '/vnm' },
+    { label: 'Coverage', path: '/states' },
+    { label: 'Success Stories', path: '/case-studies' },
   ]
-
-  const handleNavClick = (e, href) => {
-    if (isLandingPage && href.startsWith('#')) {
-      e.preventDefault()
-      const element = document.querySelector(href)
-      element?.scrollIntoView({ behavior: 'smooth' })
-      setIsOpen(false)
-    }
-  }
 
   return (
     <>
@@ -61,24 +51,13 @@ export default function Navbar() {
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-1">
               {navLinks.map((link) => (
-                isLandingPage && link.href ? (
-                  <a
-                    key={link.label}
-                    href={link.href}
-                    onClick={(e) => handleNavClick(e, link.href)}
-                    className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 transition-colors"
-                  >
-                    {link.label}
-                  </a>
-                ) : (
-                  <Link
-                    key={link.label}
-                    to={link.path}
-                    className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                )
+                <Link
+                  key={link.label}
+                  to={link.path}
+                  className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 transition-colors"
+                >
+                  {link.label}
+                </Link>
               ))}
             </div>
 
@@ -122,25 +101,14 @@ export default function Navbar() {
             >
               <div className="container-wide py-4 space-y-2">
                 {navLinks.map((link) => (
-                  isLandingPage && link.href ? (
-                    <a
-                      key={link.label}
-                      href={link.href}
-                      onClick={(e) => handleNavClick(e, link.href)}
-                      className="block px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
-                    >
-                      {link.label}
-                    </a>
-                  ) : (
-                    <Link
-                      key={link.label}
-                      to={link.path}
-                      className="block px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      {link.label}
-                    </Link>
-                  )
+                  <Link
+                    key={link.label}
+                    to={link.path}
+                    className="block px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
                 ))}
                 <div className="pt-2 border-t border-slate-200 space-y-2">
                   <Link to="/calculator" className="btn-primary w-full justify-center text-sm">

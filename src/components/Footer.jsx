@@ -78,11 +78,6 @@ export default function Footer() {
                   VNM vs GNM
                 </Link>
               </li>
-              <li>
-                <Link to="/faq" className="text-slate-400 hover:text-primary-400 transition-colors">
-                  FAQ
-                </Link>
-              </li>
             </ul>
           </div>
 
