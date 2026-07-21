@@ -10,5 +10,8 @@ export default defineConfig({
   server: {
     port: 5173,
     open: true
+  },
+  preview: {
+    allowedHosts: ['vnm-gnm.onrender.com', 'localhost', '127.0.0.1']
   }
 })
