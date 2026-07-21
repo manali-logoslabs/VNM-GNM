@@ -8,6 +8,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [showChat, setShowChat] = useState(false)
+  const [showHowItWorks, setShowHowItWorks] = useState(false)
   const location = useLocation()
   const isLandingPage = location.pathname === '/'
 
@@ -50,7 +51,43 @@ export default function Navbar() {
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-1">
-              {navLinks.map((link) => (
+              {/* How It Works Dropdown */}
+              <div
+                className="relative"
+                onMouseEnter={() => setShowHowItWorks(true)}
+                onMouseLeave={() => setShowHowItWorks(false)}
+              >
+                <button className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 transition-colors">
+                  How It Works ▼
+                </button>
+                <AnimatePresence>
+                  {showHowItWorks && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute top-full left-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden z-50"
+                    >
+                      <Link
+                        to="/vnm"
+                        className="block px-4 py-3 text-sm font-medium text-slate-600 hover:bg-primary-50 hover:text-primary-600 transition-colors border-b border-slate-100"
+                      >
+                        Virtual Net Metering
+                      </Link>
+                      <Link
+                        to="/gnm"
+                        className="block px-4 py-3 text-sm font-medium text-slate-600 hover:bg-primary-50 hover:text-primary-600 transition-colors"
+                      >
+                        Group Net Metering
+                      </Link>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Other Links */}
+              {navLinks.slice(1).map((link) => (
                 <Link
                   key={link.label}
                   to={link.path}
@@ -63,7 +100,7 @@ export default function Navbar() {
 
             {/* CTA Buttons */}
             <div className="hidden md:flex items-center gap-3">
-              <Link to="/calculator" className="btn-primary text-sm">
+              <Link to="/bill-simulator" className="btn-primary text-sm">
                 <Zap className="w-4 h-4" />
                 Calculate
               </Link>
@@ -100,7 +137,49 @@ export default function Navbar() {
               className="lg:hidden bg-white border-t border-slate-200"
             >
               <div className="container-wide py-4 space-y-2">
-                {navLinks.map((link) => (
+                {/* Mobile How It Works Dropdown */}
+                <div>
+                  <button
+                    onClick={() => setShowHowItWorks(!showHowItWorks)}
+                    className="w-full text-left px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
+                  >
+                    How It Works {showHowItWorks ? '▲' : '▼'}
+                  </button>
+                  <AnimatePresence>
+                    {showHowItWorks && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <Link
+                          to="/vnm"
+                          className="block px-6 py-2 text-sm text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
+                          onClick={() => {
+                            setIsOpen(false)
+                            setShowHowItWorks(false)
+                          }}
+                        >
+                          Virtual Net Metering
+                        </Link>
+                        <Link
+                          to="/gnm"
+                          className="block px-6 py-2 text-sm text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
+                          onClick={() => {
+                            setIsOpen(false)
+                            setShowHowItWorks(false)
+                          }}
+                        >
+                          Group Net Metering
+                        </Link>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Other Links */}
+                {navLinks.slice(1).map((link) => (
                   <Link
                     key={link.label}
                     to={link.path}
@@ -111,7 +190,7 @@ export default function Navbar() {
                   </Link>
                 ))}
                 <div className="pt-2 border-t border-slate-200 space-y-2">
-                  <Link to="/calculator" className="btn-primary w-full justify-center text-sm">
+                  <Link to="/bill-simulator" className="btn-primary w-full justify-center text-sm">
                     <Zap className="w-4 h-4" />
                     Calculate Savings
                   </Link>

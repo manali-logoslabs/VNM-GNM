@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowRight, CheckCircle, Zap, Home, Building2, Sun, Grid3x3, TrendingDown, Shield, Users, Lightbulb, Award, Clock, Smartphone, Leaf, Flame, MapPin, Headphones } from 'lucide-react'
 
@@ -34,6 +35,7 @@ const BadgeIcon = ({ icon: Icon, label, color }) => (
 )
 
 export default function LandingPageV2() {
+  const navigate = useNavigate()
   const [selectedPersona, setSelectedPersona] = useState(null)
   const [activeTab, setActiveTab] = useState('vnm')
 
@@ -104,6 +106,7 @@ export default function LandingPageV2() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/contact')}
                 className="btn-primary text-base px-8 py-4 flex items-center gap-2 w-fit hover:shadow-xl transition-shadow"
               >
                 <span>🎯 Book Free Consultation</span>
@@ -608,22 +611,14 @@ export default function LandingPageV2() {
               Thousands of Indians are saving ₹40K-₹2.5L annually. Your turn is next.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-white text-primary-600 px-10 py-4 rounded-lg font-bold text-lg hover:shadow-xl transition-all"
-              >
-                📞 Book Consultation
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="border-2 border-white text-white px-10 py-4 rounded-lg font-bold text-lg hover:bg-white/10 transition-all"
-              >
-                💬 Chat with AI Expert
-              </motion.button>
-            </div>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate('/contact')}
+              className="bg-white text-primary-600 px-10 py-4 rounded-lg font-bold text-lg hover:shadow-xl transition-all"
+            >
+              📞 Book Free Consultation
+            </motion.button>
 
             <p className="text-primary-200 mt-8">✓ Free consultation • ✓ No hidden costs • ✓ 25-year warranty</p>
           </motion.div>

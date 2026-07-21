@@ -1,24 +1,42 @@
-// Calculate solar system savings
+import { STATE_POLICIES, getAverageTariff } from '../data/statePolicy'
+
+// Calculate solar system savings using state-specific policies
 export const calculateSavings = (params) => {
   const {
     monthlyBill,
     monthlyConsumption,
     solarCapacity,
-    surplusTariff,
-    discountFactor = 0.75,
+    state,
+    consumerType = 'residential',
     participantCount = 1,
     formulation = 'vnm'
   } = params
 
-  if (!monthlyBill || !monthlyConsumption || !solarCapacity) {
+  if (!monthlyBill || !monthlyConsumption || !solarCapacity || !state) {
     return null
   }
 
-  // Average tariff per kWh
-  const avgTariffPerKwh = monthlyBill / monthlyConsumption
+  // Get state policy
+  const policy = STATE_POLICIES[state]
+  if (!policy) return null
 
-  // Annual solar generation (assuming 5 peak sun hours/day average across India)
-  const peakSunHours = 5
+  // Get retail tariff for state and consumer type (normalized to lowercase)
+  const normalizedType = consumerType.toLowerCase().replace('_', '')
+  const retailTariffData = policy.retailTariff[normalizedType]
+  let avgTariffPerKwh = monthlyBill / monthlyConsumption
+
+  // If policy has tariff data, use it (validate against bill)
+  if (retailTariffData) {
+    avgTariffPerKwh = getAverageTariff(retailTariffData, monthlyConsumption)
+  }
+
+  // Export tariff (state-specific, fallback to 75% if not available)
+  const exportTariff = policy.exportTariff || (avgTariffPerKwh * 0.75)
+
+  // Peak sun hours (state-specific, default to 5 if not available)
+  const peakSunHours = policy.peakSunHours || 5
+
+  // Annual solar generation
   const annualSolarGeneration = solarCapacity * peakSunHours * 365
 
   // Account for system losses (~15%)
@@ -33,9 +51,9 @@ export const calculateSavings = (params) => {
   const monthlySelfConsumed = selfConsumedEnergy / 12
   const monthlySurplus = surplusEnergy / 12
 
-  // Savings calculation
+  // Savings calculation using state-specific tariffs
   const selfConsumptionSavings = selfConsumedEnergy * avgTariffPerKwh
-  const surplusSavings = surplusEnergy * (avgTariffPerKwh * discountFactor)
+  const surplusSavings = surplusEnergy * exportTariff
   const totalAnnualSavings = selfConsumptionSavings + surplusSavings
 
   // For VNM with multiple participants, adjust
@@ -43,8 +61,9 @@ export const calculateSavings = (params) => {
     ? totalAnnualSavings / participantCount
     : totalAnnualSavings
 
-  // Payback period (assuming ₹2.0-2.5 lakhs per kW installed cost)
-  const totalInstallationCost = solarCapacity * 200000
+  // System cost (state-specific, default to ₹2L if not available)
+  const systemCostPerKw = policy.systemCost || 200000
+  const totalInstallationCost = solarCapacity * systemCostPerKw
   const paybackYears = totalInstallationCost / totalAnnualSavings
 
   // 5, 10, 25 year projections

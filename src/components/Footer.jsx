@@ -47,13 +47,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/calculator" className="text-slate-400 hover:text-primary-400 transition-colors">
+                <Link to="/bill-simulator" className="text-slate-400 hover:text-primary-400 transition-colors">
                   Savings Calculator
-                </Link>
-              </li>
-              <li>
-                <Link to="/eligibility" className="text-slate-400 hover:text-primary-400 transition-colors">
-                  Eligibility Check
                 </Link>
               </li>
             </ul>

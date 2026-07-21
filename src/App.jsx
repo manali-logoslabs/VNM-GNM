@@ -6,7 +6,8 @@ import VirtualNetMetering from './pages/VirtualNetMetering'
 import GroupNetMetering from './pages/GroupNetMetering'
 import Comparison from './pages/Comparison'
 import Calculator from './pages/Calculator'
-import Eligibility from './pages/Eligibility'
+import SavingsCalculator from './pages/SavingsCalculator'
+import BillSimulator from './pages/BillSimulator'
 import StateEligibility from './pages/StateEligibility'
 import CaseStudies from './pages/CaseStudies'
 import Contact from './pages/Contact'
@@ -23,7 +24,8 @@ export default function App() {
             <Route path="/gnm" element={<GroupNetMetering />} />
             <Route path="/comparison" element={<Comparison />} />
             <Route path="/calculator" element={<Calculator />} />
-            <Route path="/eligibility" element={<Eligibility />} />
+            <Route path="/savings-calculator" element={<SavingsCalculator />} />
+            <Route path="/bill-simulator" element={<BillSimulator />} />
             <Route path="/states" element={<StateEligibility />} />
             <Route path="/case-studies" element={<CaseStudies />} />
             <Route path="/contact" element={<Contact />} />

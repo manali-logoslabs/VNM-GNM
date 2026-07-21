@@ -44,7 +44,7 @@ export default function GroupNetMetering() {
             <p className="text-xl text-slate-600 mb-8">
               One owner, multiple connections. Perfect for businesses with multiple locations, large buildings, or industrial facilities.
             </p>
-            <Link to="/calculator" className="btn-primary">
+            <Link to="/bill-simulator" className="btn-primary">
               <Zap className="w-5 h-5" />
               Calculate Your Savings
             </Link>

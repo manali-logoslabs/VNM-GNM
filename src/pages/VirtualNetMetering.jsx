@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { ArrowRight, Users, Zap, TrendingUp, CheckCircle } from 'lucide-react'
+import { Users, Zap, TrendingUp, CheckCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { BenefitCard } from '../components/Cards'
 
@@ -86,7 +86,7 @@ export default function VirtualNetMetering() {
             <p className="text-xl text-slate-600 mb-8">
               Share solar energy with your community. Perfect for housing societies, institutions, and residential complexes.
             </p>
-            <Link to="/calculator" className="btn-primary">
+            <Link to="/bill-simulator" className="btn-primary">
               <Zap className="w-5 h-5" />
               Calculate Your Savings
             </Link>
@@ -160,12 +160,6 @@ export default function VirtualNetMetering() {
             ))}
           </div>
 
-          <div className="mt-12 text-center">
-            <Link to="/eligibility" className="btn-secondary">
-              <ArrowRight className="w-5 h-5" />
-              Check Your Eligibility
-            </Link>
-          </div>
         </div>
       </section>
 
@@ -203,7 +197,7 @@ export default function VirtualNetMetering() {
             Get your personalized savings estimate and book a free consultation today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/calculator" className="inline-flex items-center justify-center px-8 py-3 bg-white text-primary-600 font-semibold rounded-lg hover:bg-slate-100 transition-colors gap-2">
+            <Link to="/bill-simulator" className="inline-flex items-center justify-center px-8 py-3 bg-white text-primary-600 font-semibold rounded-lg hover:bg-slate-100 transition-colors gap-2">
               Calculate Savings
             </Link>
             <Link to="/contact" className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-primary-600 transition-colors gap-2">

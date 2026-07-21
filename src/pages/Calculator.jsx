@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { LineChart, Line, BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { STATE_DATA, CONSUMER_TYPES } from '../data/states'
-import { calculateSavings, formatINR, formatNumber } from '../utils/calculator'
-import { ArrowDown, Calculator as CalcIcon, Upload, CheckCircle, X } from 'lucide-react'
+import { formatINR, formatNumber } from '../utils/calculator'
+import { apiClient } from '../utils/apiClient'
+import { ArrowDown, Calculator as CalcIcon, Upload, CheckCircle, X, AlertCircle } from 'lucide-react'
 
 export default function Calculator() {
   const [state, setState] = useState('karnataka')
@@ -15,6 +16,10 @@ export default function Calculator() {
   const [formulation, setFormulation] = useState('vnm')
   const [billUpload, setBillUpload] = useState(null)
   const [billPreview, setBillPreview] = useState(null)
+  const [savings, setSavings] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [backendOnline, setBackendOnline] = useState(false)
 
   const states = Object.entries(STATE_DATA).map(([key, value]) => ({
     value: key,
@@ -23,52 +28,94 @@ export default function Calculator() {
 
   const stateData = STATE_DATA[state]
 
-  const savings = useMemo(() => {
-    return calculateSavings({
-      monthlyBill,
-      monthlyConsumption,
-      solarCapacity,
-      surplusTariff: 0.75,
-      participantCount: formulation === 'vnm' ? participantCount : 1,
-      formulation
-    })
-  }, [monthlyBill, monthlyConsumption, solarCapacity, participantCount, formulation])
+  // Check backend health on mount
+  useEffect(() => {
+    apiClient.health().then(setBackendOnline).catch(() => setBackendOnline(false))
+  }, [])
 
-  const projectionData = [
+  // Fetch calculation from backend with debouncing
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (!backendOnline) {
+        setError('Backend not connected. Please start the backend server.')
+        return
+      }
+      try {
+        setLoading(true)
+        setError(null)
+        const result = await apiClient.calculate({
+          monthlyBill,
+          monthlyConsumption,
+          solarCapacity,
+          state,
+          consumerType,
+          participantCount: formulation === 'vnm' ? participantCount : 1,
+          formulation
+        })
+        setSavings(result)
+      } catch (err) {
+        setError(err.message || 'Calculation failed')
+        setSavings(null)
+      } finally {
+        setLoading(false)
+      }
+    }, 500) // Debounce: wait 500ms before calculating
+
+    return () => clearTimeout(timer)
+  }, [monthlyBill, monthlyConsumption, solarCapacity, state, consumerType, participantCount, formulation, backendOnline])
+
+  const projectionData = savings ? [
     { year: 'Year 1', savings: savings.projections.year1 },
     { year: 'Year 5', savings: savings.projections.year5 },
     { year: 'Year 10', savings: savings.projections.year10 },
     { year: 'Year 25', savings: savings.projections.year25 }
-  ]
+  ] : []
 
-  const monthlyData = Array.from({ length: 12 }, (_, i) => ({
+  const monthlyData = savings ? Array.from({ length: 12 }, (_, i) => ({
     month: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][i],
     savings: Math.round(savings.monthlySavings * (0.85 + Math.random() * 0.3)) // Seasonal variation
-  }))
+  })) : []
 
   const COLORS = ['#16a34a', '#15803d', '#dc2626', '#ca8a04']
 
-  const handleBillUpload = (e) => {
+  const handleBillUpload = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      const imageData = event.target?.result
-      setBillPreview(imageData)
+    try {
+      setLoading(true)
+      setError(null)
 
-      setTimeout(() => {
+      // Show preview
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        setBillPreview(event.target?.result)
+      }
+      reader.readAsDataURL(file)
+
+      // Extract data via backend OCR
+      const extracted = await apiClient.extractBill(file)
+
+      if (extracted.extracted.state && extracted.extracted.monthlyBill) {
         setBillUpload({
           fileName: file.name,
-          detected: true
+          detected: true,
+          extracted: extracted.extracted
         })
-        setState('karnataka')
-        setConsumerType('residential')
-        setMonthlyBill(8500)
-        setMonthlyConsumption(1200)
-      }, 1500)
+
+        // Auto-fill form with extracted data
+        setState(extracted.extracted.state)
+        setConsumerType(extracted.extracted.consumerType || 'residential')
+        setMonthlyBill(extracted.extracted.monthlyBill)
+        setMonthlyConsumption(extracted.extracted.monthlyConsumption || monthlyConsumption)
+      } else {
+        setError('Could not extract bill data. Please enter details manually.')
+      }
+    } catch (err) {
+      setError(`Bill extraction failed: ${err.message}. Please enter details manually.`)
+    } finally {
+      setLoading(false)
     }
-    reader.readAsDataURL(file)
   }
 
   const clearBillUpload = () => {
@@ -278,7 +325,36 @@ export default function Calculator() {
           </div>
         </motion.div>
 
+        {/* Error Display */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8 flex items-start gap-3"
+          >
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold text-red-900">Error</p>
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Loading Indicator */}
+        {loading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8 flex items-center gap-3"
+          >
+            <div className="w-4 h-4 bg-blue-600 rounded-full animate-pulse" />
+            <p className="text-blue-700">Calculating savings...</p>
+          </motion.div>
+        )}
+
         {/* Results Grid */}
+        {savings && (
+          <div>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {[
             { label: 'Monthly Savings', value: savings.monthlySavings, prefix: '₹' },
@@ -384,7 +460,7 @@ export default function Calculator() {
             <div className="space-y-4">
               <div className="bg-primary-50 p-6 rounded-lg">
                 <p className="text-sm text-slate-600 mb-2">Recommended Model</p>
-                <p className="text-2xl font-bold text-primary-600">{savings.recommendedModel.toUpperCase()}</p>
+                <p className="text-2xl font-bold text-primary-600">{savings.recommendedModel ? savings.recommendedModel.toUpperCase() : 'VNM'}</p>
               </div>
               <div className="bg-slate-50 p-6 rounded-lg">
                 <p className="text-sm text-slate-600 mb-2">Total 5-Year Savings</p>
@@ -414,6 +490,8 @@ export default function Calculator() {
             Book Free Consultation
           </a>
         </motion.div>
+          </div>
+        )}
       </div>
     </div>
   )
