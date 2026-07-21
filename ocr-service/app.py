@@ -262,12 +262,17 @@ def extract_ocr():
         return jsonify({'success': False, 'error': f'Server error: {str(e)}'}), 500
 
 
+@app.route('/', methods=['GET', 'HEAD'])
+def root():
+    return jsonify({'status': 'OCR service ready'}), 200
+
+
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({'status': 'OCR service running'}), 200
 
 
 if __name__ == '__main__':
-    print("🚀 Real OCR Service running on http://localhost:5001")
+    print("🚀 Real OCR Service running on http://0.0.0.0:5001")
     print("📸 Extracts text from any electricity bill image")
-    app.run(debug=False, port=5001, host='127.0.0.1')
+    app.run(debug=False, port=5001, host='0.0.0.0')
