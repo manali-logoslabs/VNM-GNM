@@ -11,13 +11,7 @@ import re
 import os
 
 app = Flask(__name__)
-CORS(app, resources={
-  r"/api/*": {
-    "origins": ["https://vnm-gnm.onrender.com", "http://localhost:4173", "http://localhost:5173"],
-    "methods": ["GET", "POST", "OPTIONS"],
-    "allow_headers": ["Content-Type"]
-  }
-})
+CORS(app)
 
 def preprocess_image(image):
     """Enhance image for better OCR accuracy"""
