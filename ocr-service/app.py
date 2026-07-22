@@ -198,11 +198,27 @@ def extract_bill_data(text):
 
     # Leave as 0 if not found - user can enter manually
 
-    # Extract service/account/consumer number (long digit sequences)
-    for num_str in numbers:
-        if len(num_str) >= 9 and '.' not in num_str:
-            data['serviceNumber'] = num_str
+    # Extract service/account/consumer number
+    account_patterns = [
+        r'ACCOUNT\s+NO\s*:?\s*(\d{10})',
+        r'ACCOUNT\s*:?\s*(\d{10})',
+        r'CONSUMER\s+NO\s*:?\s*(\d{10})',
+        r'SERVICE\s+NUMBER\s*:?\s*(\d{10})',
+        r'A/C\s*:?\s*(\d{10})',
+    ]
+
+    for pattern in account_patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            data['serviceNumber'] = match.group(1)
             break
+
+    # Fallback: find any 10-digit number
+    if not data['serviceNumber']:
+        for num_str in numbers:
+            if len(num_str) == 10 and '.' not in num_str:
+                data['serviceNumber'] = num_str
+                break
 
     # Detect tariff category
     if 'DOMESTIC' in upper or 'DS' in upper or 'RESIDENTIAL' in upper:
