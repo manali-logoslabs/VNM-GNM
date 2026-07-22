@@ -11,7 +11,8 @@ export const parseBill = async (imageFile, onProgress) => {
 
       if (onProgress) onProgress({ progress: 0.1 })
 
-      fetch('http://localhost:5001/api/ocr/extract', {
+      const OCR_URL = import.meta.env.VITE_OCR_URL || 'https://vnm-gnm-ocr.onrender.com/api/ocr/extract'
+      fetch(OCR_URL, {
         method: 'POST',
         body: formData
       })
