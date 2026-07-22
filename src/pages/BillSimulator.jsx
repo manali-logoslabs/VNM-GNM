@@ -132,7 +132,7 @@ export default function BillSimulator() {
         daytimeConsumptionPercent: daytimeConsumption
       }
 
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+      const API_URL = import.meta.env.VITE_API_URL || 'https://vnm-gnm-backend.onrender.com/api'
       const response = await fetch(`${API_URL}/bill-simulator/calculate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
