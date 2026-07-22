@@ -218,11 +218,16 @@ def extract_ocr():
 
         # Extract text using Tesseract OCR
         try:
-            ocr_text = pytesseract.image_to_string(image)
+            print(f"DEBUG: Attempting OCR with pytesseract...")
+            ocr_text = pytesseract.image_to_string(image, lang='eng')
+            print(f"DEBUG: OCR successful, extracted {len(ocr_text)} characters")
         except Exception as e:
+            print(f"ERROR: pytesseract failed: {str(e)}")
+            import traceback
+            print(traceback.format_exc())
             return jsonify({
                 'success': False,
-                'error': f'OCR processing failed: {str(e)}. Make sure Tesseract is installed: brew install tesseract'
+                'error': f'OCR processing failed: {str(e)}'
             }), 500
 
         if not ocr_text or len(ocr_text.strip()) < 10:
