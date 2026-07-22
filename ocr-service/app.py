@@ -9,9 +9,54 @@ import pytesseract
 import io
 import re
 import os
+import sys
+import shutil
+import subprocess
 
 app = Flask(__name__)
 CORS(app)
+
+# Startup diagnostics
+print("\n" + "="*60)
+print("OCR SERVICE STARTUP DIAGNOSTICS")
+print("="*60)
+print(f"Python version: {sys.version}")
+print(f"Python executable: {sys.executable}")
+print(f"Current working directory: {os.getcwd()}")
+print(f"Current PATH: {os.environ.get('PATH', 'NOT SET')}")
+print(f"pytesseract version: {pytesseract.__version__ if hasattr(pytesseract, '__version__') else 'unknown'}")
+
+# Check tesseract in PATH
+tesseract_path = shutil.which("tesseract")
+print(f"Tesseract in PATH (shutil.which): {tesseract_path}")
+
+# Try to get tesseract version
+try:
+    result = subprocess.run(['tesseract', '--version'], capture_output=True, text=True, timeout=5)
+    print(f"Tesseract version output:\n{result.stdout}")
+    if result.stderr:
+        print(f"Tesseract version stderr:\n{result.stderr}")
+except Exception as e:
+    print(f"ERROR getting tesseract version: {e}")
+
+# Check for language files
+tessdata_path = os.environ.get('TESSDATA_PREFIX', '/usr/share/tesseract-ocr/4.00/tessdata')
+print(f"TESSDATA_PREFIX: {os.environ.get('TESSDATA_PREFIX', 'NOT SET (will use default)')}")
+try:
+    tessdata_default = '/usr/share/tesseract-ocr/4.00/tessdata'
+    if os.path.exists(tessdata_default):
+        files = os.listdir(tessdata_default)
+        print(f"Found {len(files)} files in {tessdata_default}")
+        if 'eng.traineddata' in files:
+            print("✓ eng.traineddata found")
+        else:
+            print("✗ eng.traineddata NOT found")
+except Exception as e:
+    print(f"Could not check tessdata directory: {e}")
+
+# Check pytesseract configuration
+print(f"pytesseract.pytesseract.tesseract_cmd: {pytesseract.pytesseract.tesseract_cmd}")
+print("="*60 + "\n")
 
 def preprocess_image(image):
     """Enhance image for better OCR accuracy"""
@@ -274,7 +319,40 @@ def root():
 
 @app.route('/health', methods=['GET'])
 def health():
-    return jsonify({'status': 'OCR service running'}), 200
+    """Comprehensive health check endpoint"""
+    health_status = {
+        'status': 'OCR service running',
+        'python_version': sys.version,
+        'python_executable': sys.executable,
+        'working_directory': os.getcwd(),
+        'tesseract_in_path': shutil.which("tesseract") is not None,
+        'tesseract_path': shutil.which("tesseract"),
+        'pytesseract_version': pytesseract.__version__ if hasattr(pytesseract, '__version__') else 'unknown',
+    }
+
+    # Try to get tesseract version
+    try:
+        result = subprocess.run(['tesseract', '--version'], capture_output=True, text=True, timeout=5)
+        health_status['tesseract_version'] = result.stdout.split('\n')[0] if result.stdout else 'unknown'
+        health_status['tesseract_ready'] = True
+    except Exception as e:
+        health_status['tesseract_version'] = f'ERROR: {str(e)}'
+        health_status['tesseract_ready'] = False
+
+    # Check language files
+    try:
+        tessdata_default = '/usr/share/tesseract-ocr/4.00/tessdata'
+        if os.path.exists(tessdata_default):
+            files = os.listdir(tessdata_default)
+            health_status['eng_traineddata'] = 'eng.traineddata' in files
+            health_status['tessdata_count'] = len(files)
+        else:
+            health_status['eng_traineddata'] = False
+            health_status['tessdata_count'] = 0
+    except Exception as e:
+        health_status['tessdata_error'] = str(e)
+
+    return jsonify(health_status), 200
 
 
 if __name__ == '__main__':
