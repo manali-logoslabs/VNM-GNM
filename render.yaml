@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: VNM-GNM
+    env: node
+    buildCommand: npm ci && npm run build
+    startCommand: npm run preview -- --host 0.0.0.0
+    envVars:
+      - key: VITE_API_URL
+        value: https://vnm-gnm-backend.onrender.com/api
+
+  - type: web
+    name: vnm-gnm-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "5000"
+      - key: CORS_ORIGIN
+        value: https://vnm-gnm.onrender.com
+
+  - type: web
+    name: vnm-gnm-ocr
+    runtime: docker
+    dockerfilePath: ./ocr-service/Dockerfile
+    rootDir: ocr-service
+    envVars:
+      - key: TESSDATA_PREFIX
+        value: /usr/share/tesseract-ocr/4.00/tessdata
