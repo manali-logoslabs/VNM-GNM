@@ -37,39 +37,6 @@ export const STATE_POLICIES = {
     settlementPeriod: 'monthly'
   },
 
-  maharashtra: {
-    name: 'Maharashtra',
-    regulatoryBody: 'MERC',
-    retailTariff: {
-      domestic: 5.65,
-      commercial: 9.22,
-      industrial: 8.17,
-      agricultural: 5.50
-    },
-    exportTariff: null,
-    capacityLimits: {
-      vnm: { min: 1, max: 1000 },
-      gnm: { min: 1, max: 1000 }
-    },
-    vnm: {
-      eligible: ['residential'],
-      billing: 'ratio-based',
-      banking: true,
-      bankingCharges: 0,
-      withdrawalCharges: 0
-    },
-    gnm: {
-      eligible: ['all'],
-      billing: 'priority-based',
-      banking: true,
-      bankingCharges: 0,
-      withdrawalCharges: 0
-    },
-    systemCost: null,
-    peakSunHours: null,
-    settlementPeriod: 'monthly'
-  },
-
   rajasthan: {
     name: 'Rajasthan',
     regulatoryBody: 'RERC',
@@ -193,6 +160,60 @@ export const STATE_POLICIES = {
     },
     systemCost: null,
     peakSunHours: null,
+    settlementPeriod: 'monthly'
+  },
+
+  maharashtra: {
+    name: 'Maharashtra',
+    regulatoryBody: 'MERC',
+    retailTariff: {
+      domestic: {
+        type: 'telescopic',
+        slabs: [
+          { max: 100, rate: 3.50 },
+          { max: 300, rate: 5.25 },
+          { max: 500, rate: 6.75 },
+          { max: Infinity, rate: 8.00 }
+        ]
+      },
+      commercial: {
+        type: 'telescopic',
+        slabs: [
+          { max: 1000, rate: 8.50 },
+          { max: Infinity, rate: 9.50 }
+        ]
+      },
+      agricultural: {
+        type: 'flat',
+        rate: 4.00
+      },
+      industrial: {
+        type: 'flat',
+        rate: 7.25
+      }
+    },
+    exportTariff: 4.88,
+    capacityLimits: {
+      vnm: { min: 1, max: 'sanctioned_load' },
+      gnm: { min: 1, max: 'sanctioned_load' }
+    },
+    vnm: {
+      eligible: ['residential', 'group_housing'],
+      billing: 'ratio-based',
+      banking: true,
+      bankingCharges: 0,
+      withdrawalCharges: 0
+    },
+    gnm: {
+      eligible: ['all'],
+      billing: 'priority-based',
+      banking: true,
+      bankingCharges: 0,
+      withdrawalCharges: 0,
+      minSelfConsumption: 0.20
+    },
+    systemCost: 42500,
+    peakSunHours: 4.9,
     settlementPeriod: 'monthly'
   }
 }

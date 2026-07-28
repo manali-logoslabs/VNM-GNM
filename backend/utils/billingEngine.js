@@ -1,46 +1,56 @@
 /**
- * BILLING ENGINE
+ * BILLING ENGINE - State-Agnostic
  *
- * Implements official KERC Tariff Order 2025-26 and BESCOM billing rules
+ * Supports multiple state tariff structures:
+ * - Flat tariffs (Karnataka, Agricultural categories)
+ * - Slab-based/Telescopic tariffs (Chhattisgarh domestic/commercial)
  *
- * Input: Bill components (consumption, tariff category, fixed charges, etc.)
+ * Input: Bill components + state
  * Output: Accurate bill calculation using official tariffs
  */
 
-const KERC_TARIFFS_2025_26 = {
-  domestic: {
-    tariffPerKwh: 5.80,
-    fixedChargePerMonth: 250,
-    exportTariffPerKwh: 2.31 // 75% of 3.08 generic tariff
-  },
-  commercial: {
-    tariffPerKwh: 7.00,
-    fixedChargePerMonth: 350,
-    exportTariffPerKwh: 2.31
-  },
-  industrial: {
-    tariffPerKwh: 4.50,
-    fixedChargePerMonth: 500,
-    exportTariffPerKwh: 2.31
-  },
-  agricultural: {
-    tariffPerKwh: 7.46,
-    fixedChargePerMonth: 200,
-    exportTariffPerKwh: 2.31
-  }
+import { STATE_POLICIES, getAverageTariff } from '../models/statePolicy.js'
+
+const DEFAULT_SOLAR_CONSTANTS = {
+  systemEfficiency: 0.85,
+  degradationPerYear: 0.008
 }
 
-const SOLAR_CONSTANTS = {
-  peakSunHours: 4.56,
-  systemEfficiency: 0.85, // 15% losses
-  systemCostPerKw: 35000,
-  degradationPerYear: 0.008 // 0.8% annual
+export const validateStateComplete = (state) => {
+  const policy = STATE_POLICIES[state.toLowerCase()]
+
+  if (!policy) {
+    throw new Error(`State "${state}" not found. Supported: ${Object.keys(STATE_POLICIES).join(', ')}`)
+  }
+
+  const required = {
+    retailTariff: 'Tariff structure',
+    exportTariff: 'Export/net metering rate',
+    peakSunHours: 'Peak sun hours',
+    systemCost: 'System installation cost'
+  }
+
+  const missing = []
+  for (const [key, label] of Object.entries(required)) {
+    if (policy[key] === null || policy[key] === undefined) {
+      missing.push(`${label} (${key})`)
+    }
+  }
+
+  if (missing.length > 0) {
+    throw new Error(
+      `❌ State "${state}" has incomplete data. Missing:\n` +
+      missing.map(m => `   • ${m}`).join('\n')
+    )
+  }
+
+  return policy
 }
 
 /**
  * Calculate CURRENT bill from uploaded bill data
  */
-export const calculateCurrentBill = (billData) => {
+export const calculateCurrentBill = (billData, state = 'karnataka') => {
   const {
     monthlyConsumption,
     consumerType = 'domestic',
@@ -52,7 +62,7 @@ export const calculateCurrentBill = (billData) => {
     subsidyAmount = 0
   } = billData
 
-  const tariff = KERC_TARIFFS_2025_26[consumerType.toLowerCase()] || KERC_TARIFFS_2025_26.domestic
+  const policy = STATE_POLICIES[state.toLowerCase()]
 
   // Calculate per-unit tariff from energy charge
   const perUnitTariff = energyCharge / monthlyConsumption
@@ -85,14 +95,24 @@ export const calculateCurrentBill = (billData) => {
 /**
  * Recommend solar capacity based on consumption and sanctioned load
  */
-export const recommendSolarCapacity = (monthlyConsumption, sanctionedLoad) => {
+export const recommendSolarCapacity = (monthlyConsumption, sanctionedLoad, state = 'karnataka') => {
+  const policy = STATE_POLICIES[state.toLowerCase()]
+  const peakSunHours = policy.peakSunHours
+
   // Industry standard: 80% of annual consumption / (Peak Sun Hours × 365)
   const annualConsumption = monthlyConsumption * 12
-  const recommendedCapacity = (annualConsumption * 0.80) / (SOLAR_CONSTANTS.peakSunHours * 365)
+  const recommendedCapacity = (annualConsumption * 0.80) / (peakSunHours * 365)
 
-  // Constrain within policy limits
-  const minCapacity = 5 // KERC minimum
-  const maxCapacity = sanctionedLoad // Cannot exceed sanctioned load
+  // Constrain within state-specific policy limits
+  const minCapacity = policy.capacityLimits.vnm.min
+
+  let maxCapacity
+  if (policy.capacityLimits.vnm.max === 'sanctioned_load') {
+    maxCapacity = sanctionedLoad
+  } else {
+    maxCapacity = Math.min(policy.capacityLimits.vnm.max, sanctionedLoad)
+  }
+
   const finalCapacity = Math.max(minCapacity, Math.min(recommendedCapacity, maxCapacity))
 
   return Math.round(finalCapacity * 10) / 10 // Round to 0.1 kW
@@ -101,9 +121,13 @@ export const recommendSolarCapacity = (monthlyConsumption, sanctionedLoad) => {
 /**
  * Calculate solar generation
  */
-export const calculateSolarGeneration = (capacity) => {
-  const annualGross = capacity * SOLAR_CONSTANTS.peakSunHours * 365
-  const annualUsable = annualGross * SOLAR_CONSTANTS.systemEfficiency
+export const calculateSolarGeneration = (capacity, state = 'karnataka') => {
+  const policy = STATE_POLICIES[state.toLowerCase()]
+  const peakSunHours = policy.peakSunHours
+  const systemEfficiency = DEFAULT_SOLAR_CONSTANTS.systemEfficiency
+
+  const annualGross = capacity * peakSunHours * 365
+  const annualUsable = annualGross * systemEfficiency
   const monthlyUsable = annualUsable / 12
 
   return {
@@ -116,12 +140,11 @@ export const calculateSolarGeneration = (capacity) => {
 /**
  * Calculate NEW bill WITH solar using user's daytime consumption assumption
  */
-export const calculateBillWithSolar = (billData, solarData, daytimeConsumptionPercent) => {
+export const calculateBillWithSolar = (billData, solarData, daytimeConsumptionPercent, state = 'karnataka') => {
   const {
     monthlyConsumption,
     consumerType,
     fixedCharges,
-    energyCharge,
     facPercentage = 3,
     dutyPercentage = 12,
     taxPercentage = 5,
@@ -130,11 +153,18 @@ export const calculateBillWithSolar = (billData, solarData, daytimeConsumptionPe
 
   const { monthlyUsableKwh } = solarData
 
-  const tariff = KERC_TARIFFS_2025_26[consumerType.toLowerCase()] || KERC_TARIFFS_2025_26.domestic
+  const policy = STATE_POLICIES[state.toLowerCase()]
+  const consumerTypeNorm = consumerType.toLowerCase()
+  const retailTariffData = policy.retailTariff[consumerTypeNorm]
+
+  // Calculate import tariff (handles both flat and slab-based)
+  const importTariff = getAverageTariff(retailTariffData, monthlyConsumption)
+
+  // Export tariff from policy (no fallback - validated upfront)
+  const exportTariff = policy.exportTariff
 
   // Energy split based on user's daytime consumption %
   const daytimeConsumptionKwh = (monthlyConsumption * daytimeConsumptionPercent) / 100
-  const nighttimeConsumptionKwh = monthlyConsumption - daytimeConsumptionKwh
 
   // Solar consumption (up to available solar during daytime)
   const solarConsumptionKwh = Math.min(monthlyUsableKwh, daytimeConsumptionKwh)
@@ -146,10 +176,10 @@ export const calculateBillWithSolar = (billData, solarData, daytimeConsumptionPe
   const gridConsumptionKwh = monthlyConsumption - solarConsumptionKwh
 
   // Energy charge from grid
-  const gridEnergyCharge = gridConsumptionKwh * tariff.tariffPerKwh
+  const gridEnergyCharge = gridConsumptionKwh * importTariff
 
   // Export credit
-  const exportCredit = exportedKwh * tariff.exportTariffPerKwh
+  const exportCredit = exportedKwh * exportTariff
 
   // FAC on reduced energy
   const facCharge = (gridEnergyCharge * facPercentage) / 100
@@ -182,11 +212,14 @@ export const calculateBillWithSolar = (billData, solarData, daytimeConsumptionPe
 /**
  * Calculate financial metrics
  */
-export const calculateFinancials = (currentBill, newBill, capacity) => {
+export const calculateFinancials = (currentBill, newBill, capacity, state = 'karnataka') => {
+  const policy = STATE_POLICIES[state.toLowerCase()]
+  const systemCostPerKw = policy.systemCost
+
   const monthlySavings = currentBill.totalBill - newBill.totalBill
   const annualSavings = monthlySavings * 12
 
-  const systemCost = capacity * SOLAR_CONSTANTS.systemCostPerKw
+  const systemCost = capacity * systemCostPerKw
   const paybackYears = systemCost / annualSavings
 
   return {
@@ -201,7 +234,7 @@ export const calculateFinancials = (currentBill, newBill, capacity) => {
 /**
  * Main function: Calculate everything
  */
-export const calculateBillSimulation = (input) => {
+export const calculateBillSimulation = (input, state = 'karnataka') => {
   const {
     monthlyConsumption,
     sanctionedLoad,
@@ -214,6 +247,10 @@ export const calculateBillSimulation = (input) => {
     subsidyAmount = 0,
     daytimeConsumptionPercent = 40
   } = input
+
+  // Strict state validation - MUST have all required data
+  const normalizedState = state.toLowerCase()
+  const policy = validateStateComplete(normalizedState)
 
   // Validate input
   if (monthlyConsumption === undefined || monthlyConsumption === null || monthlyConsumption <= 0) {
@@ -240,19 +277,21 @@ export const calculateBillSimulation = (input) => {
     taxPercentage,
     subsidyAmount
   }
-  const currentBill = calculateCurrentBill(billData)
+  const currentBill = calculateCurrentBill(billData, normalizedState)
 
   // Step 2: Recommend solar capacity
-  const recommendedCapacity = recommendSolarCapacity(monthlyConsumption, sanctionedLoad)
+  const recommendedCapacity = recommendSolarCapacity(monthlyConsumption, sanctionedLoad, normalizedState)
 
   // Step 3: Calculate solar generation
-  const solarGeneration = calculateSolarGeneration(recommendedCapacity)
+  const solarGeneration = calculateSolarGeneration(recommendedCapacity, normalizedState)
 
   // Step 4: Calculate bill with solar
-  const newBill = calculateBillWithSolar(billData, solarGeneration, daytimeConsumptionPercent)
+  const newBill = calculateBillWithSolar(billData, solarGeneration, daytimeConsumptionPercent, normalizedState)
 
   // Step 5: Calculate financials
-  const financials = calculateFinancials(currentBill, newBill, recommendedCapacity)
+  const financials = calculateFinancials(currentBill, newBill, recommendedCapacity, normalizedState)
+
+  const peakSunHours = policy.peakSunHours || DEFAULT_SOLAR_CONSTANTS.peakSunHours
 
   return {
     before: {
@@ -282,17 +321,18 @@ export const calculateBillSimulation = (input) => {
       percentReductionPercent: financials.percentReduction
     },
     assumptions: {
+      state: policy.name,
+      regulatoryBody: policy.regulatoryBody,
       daytimeConsumptionPercent,
       nighttimeConsumptionPercent: 100 - daytimeConsumptionPercent,
-      peakSunHoursKarnataka: SOLAR_CONSTANTS.peakSunHours,
-      systemEfficiencyPercent: (SOLAR_CONSTANTS.systemEfficiency * 100),
-      tariffSource: 'KERC Tariff Order 2025-26',
-      billingRulesSource: 'BESCOM SOP'
+      peakSunHours,
+      systemEfficiencyPercent: (DEFAULT_SOLAR_CONSTANTS.systemEfficiency * 100),
+      settlementPeriod: policy.settlementPeriod
     },
     metadata: {
       calculatedAt: new Date().toISOString(),
-      version: '2.0-BILL-SIMULATOR',
-      accuracy: 'Based on official KERC tariffs and BESCOM billing rules'
+      version: '2.1-BILL-SIMULATOR-STATE-AWARE',
+      accuracy: `Based on official ${policy.regulatoryBody} tariffs`
     }
   }
 }
@@ -303,7 +343,5 @@ export default {
   calculateBillWithSolar,
   recommendSolarCapacity,
   calculateSolarGeneration,
-  calculateFinancials,
-  KERC_TARIFFS_2025_26,
-  SOLAR_CONSTANTS
+  calculateFinancials
 }

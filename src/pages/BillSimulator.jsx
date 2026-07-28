@@ -114,6 +114,7 @@ export default function BillSimulator() {
 
     try {
       const payload = {
+        state: extractedData.state || 'karnataka',
         monthlyConsumption: extractedData.monthlyConsumptionKwh,
         sanctionedLoad: extractedData.sanctionedLoadKw,
         consumerType: extractedData.tariffCategory.toLowerCase(),
@@ -308,12 +309,12 @@ export default function BillSimulator() {
                 </div>
               )}
 
-              {extractedData.ocrConfidence < 0.75 && getMissingFields().length === 0 && (
+              {extractedData.ocrConfidence > 0 && extractedData.ocrConfidence < 0.75 && (
                 <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex gap-3">
                   <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="font-semibold text-yellow-900">⚠️ Low OCR Confidence</p>
-                    <p className="text-yellow-800 text-sm">Please carefully review the data before proceeding</p>
+                    <p className="text-yellow-800 text-sm">Please carefully review the extracted data before proceeding</p>
                   </div>
                 </div>
               )}
@@ -324,13 +325,21 @@ export default function BillSimulator() {
                   <h3 className="font-bold text-gray-900 mb-4">Consumer Info</h3>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-xs text-gray-600 font-semibold">Service Number</label>
-                      <input
-                        type="text"
-                        value={extractedData.serviceNumber}
-                        onChange={e => handleDataUpdate('serviceNumber', e.target.value)}
+                      <label className="text-xs text-gray-600 font-semibold">State</label>
+                      <select
+                        value={extractedData.state || 'karnataka'}
+                        onChange={e => handleDataUpdate('state', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mt-1"
-                      />
+                      >
+                        <option value="karnataka">Karnataka (KERC)</option>
+                        <option value="chhattisgarh">Chhattisgarh (CSERC)</option>
+                        <option value="maharashtra">Maharashtra (MERC)</option>
+                        <option value="rajasthan">Rajasthan (RERC)</option>
+                        <option value="meghalaya">Meghalaya (MSERC)</option>
+                      </select>
+                      {extractedData.ocrConfidence > 0 && (
+                        <p className="text-xs text-gray-500 mt-1">Detected from bill ✓</p>
+                      )}
                     </div>
                     <div>
                       <label className="text-xs text-gray-600 font-semibold">Tariff Category</label>
@@ -512,8 +521,8 @@ export default function BillSimulator() {
                 <h3 className="font-bold text-amber-900 mb-3">⚠️ Assumptions & Limitations</h3>
                 <ul className="text-sm text-amber-900 space-y-2">
                   <li>✓ Bill data extracted from your uploaded bill</li>
-                  <li>✓ Solar generation based on KERC peak sun hours (4.56 kWh/kW/day)</li>
-                  <li>✓ Tariff rates from official KERC Tariff Order 2025-26</li>
+                  <li>✓ Solar generation based on state-specific peak sun hours</li>
+                  <li>✓ Tariff rates from official state tariff orders</li>
                   <li>⚠️ Daytime consumption % is YOUR ESTIMATE - actual varies by season</li>
                   <li>⚠️ Does not account for battery storage or EV charging</li>
                   <li>⚠️ Assumes single-tier tariff (not ToD slabs)</li>
@@ -647,9 +656,9 @@ export default function BillSimulator() {
                   <div className="space-y-2 text-sm text-gray-700">
                     <p>✓ Daytime consumption: <strong>{daytimeConsumption}%</strong></p>
                     <p>✓ Night consumption: <strong>{100 - daytimeConsumption}%</strong></p>
-                    <p>✓ Peak sun hours: <strong>4.56 kWh/kW/day</strong> (KERC)</p>
+                    <p>✓ Peak sun hours: <strong>State-specific values</strong></p>
                     <p>✓ System efficiency: <strong>85%</strong></p>
-                    <p>✓ Tariff: <strong>Official KERC rates</strong></p>
+                    <p>✓ Tariff: <strong>Official state tariff rates</strong></p>
                   </div>
                 </div>
               </div>
@@ -659,8 +668,8 @@ export default function BillSimulator() {
                 <h3 className="font-bold text-amber-900 mb-3">⚠️ Important: Transparency Notice</h3>
                 <ul className="text-sm text-amber-900 space-y-2">
                   <li><strong>✓ Verified Data:</strong> Bill components extracted from your uploaded bill using OCR</li>
-                  <li><strong>✓ Official Rates:</strong> Tariffs from KERC Tariff Order 2025-26</li>
-                  <li><strong>✓ Generation Estimate:</strong> Based on KERC peak sun hours for Karnataka</li>
+                  <li><strong>✓ Official Rates:</strong> Tariffs from your state's regulatory body</li>
+                  <li><strong>✓ Generation Estimate:</strong> Based on state-specific peak sun hours</li>
                   <li><strong>⚠️ User Estimate:</strong> Daytime consumption % is {daytimeConsumption}% - based on your input</li>
                   <li><strong>⚠️ Seasonal Variation:</strong> Actual solar generation varies ±20% by season</li>
                   <li><strong>⚠️ Consumption Variation:</strong> Your actual daytime consumption may differ from {daytimeConsumption}%</li>

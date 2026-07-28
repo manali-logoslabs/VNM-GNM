@@ -64,12 +64,15 @@ const CONSTANTS = {
   }
 }
 
+import { STATE_POLICIES, getAverageTariff } from '../models/statePolicy.js'
+
 /**
  * Main calculation function
  * @param {Object} billData - Extracted bill data
+ * @param {String} state - State code (default: 'karnataka')
  * @returns {Object} Complete savings analysis
  */
-export const calculateSavings = (billData) => {
+export const calculateSavings = (billData, state = 'karnataka') => {
   const {
     monthlyConsumption,      // kWh (e.g., 1000)
     sanctionedLoad,          // kW (e.g., 10)
@@ -85,16 +88,30 @@ export const calculateSavings = (billData) => {
     throw new Error('Sanctioned load must be a positive number')
   }
 
-  // Use provided importRate or get default from tariffs
-  const tariff = CONSTANTS.TARIFFS[consumerType.toLowerCase()] || CONSTANTS.TARIFFS.domestic
-  const finalImportRate = importRate || tariff.import
-  const exportRate = tariff.export
+  // Load tariffs based on state
+  const normalizedState = state.toLowerCase()
+  const policy = STATE_POLICIES[normalizedState] || STATE_POLICIES.karnataka
+  const consumerTypeNorm = consumerType.toLowerCase()
+  const retailTariffData = policy.retailTariff[consumerTypeNorm]
+
+  // Calculate import rate from policy (handles both flat and slab-based tariffs)
+  const policyImportRate = getAverageTariff(retailTariffData, monthlyConsumption)
+  const finalImportRate = importRate || policyImportRate
+
+  // Get export rate from policy with fallback
+  let exportRate = policy.exportTariff
+  if (!exportRate) {
+    exportRate = finalImportRate * 0.75 // 75% fallback
+  }
 
   // ============================================
   // STEP 1: RECOMMEND SOLAR CAPACITY
   // ============================================
+  // Load peak sun hours from policy or use default
+  const peakSunHours = policy.peakSunHours || CONSTANTS.PEAK_SUN_HOURS
+
   // Recommendation: 80% of monthly consumption = annual capacity
-  const recommendedCapacity = Math.round((monthlyConsumption * 12 * 0.80) / (CONSTANTS.PEAK_SUN_HOURS * CONSTANTS.DAYS_PER_YEAR) * 10) / 10
+  const recommendedCapacity = Math.round((monthlyConsumption * 12 * 0.80) / (peakSunHours * CONSTANTS.DAYS_PER_YEAR) * 10) / 10
 
   // Ensure within constraints
   const minCapacity = 5 // kW (from KERC regulations)
@@ -105,7 +122,7 @@ export const calculateSavings = (billData) => {
   // STEP 2: CALCULATE ANNUAL SOLAR GENERATION
   // ============================================
   // Formula: Capacity × Peak Sun Hours × 365 × 0.85 (losses)
-  const annualSolarGenerationGross = solarCapacity * CONSTANTS.PEAK_SUN_HOURS * CONSTANTS.DAYS_PER_YEAR
+  const annualSolarGenerationGross = solarCapacity * peakSunHours * CONSTANTS.DAYS_PER_YEAR
   const annualSolarGenerationUsable = annualSolarGenerationGross * (1 - CONSTANTS.SYSTEM_LOSSES)
   const monthlySolarGenerationUsable = annualSolarGenerationUsable / 12
 
@@ -156,7 +173,8 @@ export const calculateSavings = (billData) => {
   // ============================================
   // STEP 7: PAYBACK PERIOD
   // ============================================
-  const totalSystemCost = solarCapacity * CONSTANTS.SYSTEM_COST_PER_KW
+  const systemCostPerKw = policy.systemCost || CONSTANTS.SYSTEM_COST_PER_KW
+  const totalSystemCost = solarCapacity * systemCostPerKw
   const paybackYears = totalSystemCost / totalAnnualSavings
   const paybackMonths = paybackYears * 12
 
@@ -246,7 +264,7 @@ export const calculateSavings = (billData) => {
 
     // INVESTMENT & PAYBACK
     investment: {
-      systemCostPerKw: CONSTANTS.SYSTEM_COST_PER_KW,
+      systemCostPerKw: systemCostPerKw,
       totalSystemCost: Math.round(totalSystemCost),
       paybackYears: parseFloat(paybackYears.toFixed(1)),
       paybackMonths: Math.round(paybackMonths)
@@ -271,9 +289,12 @@ export const calculateSavings = (billData) => {
     // METADATA
     metadata: {
       calculatedAt: new Date().toISOString(),
-      version: '1.0',
+      version: '1.1-STATE-AWARE',
+      state: policy.name,
+      regulatoryBody: policy.regulatoryBody,
+      settlementPeriod: policy.settlementPeriod,
       constants: {
-        peakSunHours: CONSTANTS.PEAK_SUN_HOURS,
+        peakSunHours,
         systemLosses: (CONSTANTS.SYSTEM_LOSSES * 100) + '%',
         selfConsumptionRatio: (CONSTANTS.SELF_CONSUMPTION_RATIO * 100) + '%',
         exportRatio: (CONSTANTS.EXPORT_RATIO * 100) + '%'

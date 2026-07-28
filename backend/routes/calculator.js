@@ -9,6 +9,7 @@ const router = express.Router()
  *
  * Request body:
  * {
+ *   "state": "karnataka",            // Optional: state code (default: karnataka)
  *   "monthlyConsumption": 1000,      // kWh
  *   "sanctionedLoad": 10,            // kW
  *   "importRate": 5.80,              // ₹/kWh (optional, uses default if not provided)
@@ -20,6 +21,7 @@ const router = express.Router()
 router.post('/calculate', (req, res) => {
   try {
     const billData = req.body
+    const state = billData.state || 'karnataka'
 
     // Validation
     if (!billData.monthlyConsumption) {
@@ -35,7 +37,7 @@ router.post('/calculate', (req, res) => {
     }
 
     // Calculate
-    const analysis = calculateSavings(billData)
+    const analysis = calculateSavings(billData, state)
 
     // Return
     res.json({

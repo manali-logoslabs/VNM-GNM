@@ -9,6 +9,7 @@ const router = express.Router()
  *
  * Request body:
  * {
+ *   "state": "karnataka",  // Optional: karnataka (default), chhattisgarh, maharashtra, etc.
  *   "monthlyConsumption": 1500,
  *   "sanctionedLoad": 12,
  *   "consumerType": "domestic",
@@ -24,6 +25,7 @@ const router = express.Router()
 router.post('/calculate', (req, res) => {
   try {
     const input = req.body
+    const state = input.state || 'karnataka'
 
     // Validate required fields
     const required = ['monthlyConsumption', 'sanctionedLoad', 'fixedCharges', 'energyCharge']
@@ -37,7 +39,7 @@ router.post('/calculate', (req, res) => {
     }
 
     // Calculate
-    const result = calculateBillSimulation(input)
+    const result = calculateBillSimulation(input, state)
 
     res.json({
       success: true,
