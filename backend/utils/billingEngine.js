@@ -1,18 +1,27 @@
 /**
- * BILLING ENGINE - State-Agnostic
+ * BILLING ENGINE v3 - Accurate Indian Tariff Modeling
  *
- * Supports multiple state tariff structures:
- * - Flat tariffs (Karnataka, Agricultural categories)
- * - Slab-based/Telescopic tariffs (Chhattisgarh domestic/commercial)
- *
- * Input: Bill components + state
- * Output: Accurate bill calculation using official tariffs
+ * Improvements in this version:
+ * ✓ Recalculates slab-based tariffs after solar (not using stale average)
+ * ✓ Removes generic 5% tax - electricity is GST-exempt
+ * ✓ Uses state-specific electricity duty (by consumer category)
+ * ✓ Incorporates Performance Ratio (PR) instead of fixed efficiency
+ * ✓ Models each state's net metering settlement rules
+ * ✓ Calculates payback using net investment (cost - subsidy)
  */
 
-import { STATE_POLICIES, getAverageTariff } from '../models/statePolicy.js'
+import {
+  STATE_POLICIES,
+  calculateEnergyCharge,
+  getElectricityDuty,
+  getFacCharge,
+  calculateSubsidy,
+  getNetMeteringRate
+} from '../models/statePolicy.js'
 
 const DEFAULT_SOLAR_CONSTANTS = {
-  systemEfficiency: 0.85,
+  // Performance ratio fallback (if state doesn't define performanceRatio)
+  performanceRatio: 0.80,
   degradationPerYear: 0.008
 }
 
@@ -49,6 +58,7 @@ export const validateStateComplete = (state) => {
 
 /**
  * Calculate CURRENT bill from uploaded bill data
+ * Uses state-specific duty and FAC from policy (not client-supplied percentages)
  */
 export const calculateCurrentBill = (billData, state = 'karnataka') => {
   const {
@@ -56,9 +66,6 @@ export const calculateCurrentBill = (billData, state = 'karnataka') => {
     consumerType = 'domestic',
     fixedCharges,
     energyCharge,
-    facPercentage = 3,
-    dutyPercentage = 12,
-    taxPercentage = 5,
     subsidyAmount = 0
   } = billData
 
@@ -67,13 +74,15 @@ export const calculateCurrentBill = (billData, state = 'karnataka') => {
   // Calculate per-unit tariff from energy charge
   const perUnitTariff = energyCharge / monthlyConsumption
 
-  // FAC calculation
-  const facCharge = (energyCharge * facPercentage) / 100
-
-  // Duty calculation
+  // Get state-specific electricity duty by consumer category
+  const dutyPercentage = getElectricityDuty(policy, consumerType)
   const dutyCharge = (energyCharge * dutyPercentage) / 100
 
-  // Tax calculation
+  // Get state-specific FAC (Fuel Adjustment Cost)
+  const facCharge = getFacCharge(policy, energyCharge, monthlyConsumption)
+
+  // Tax: Electricity is GST-exempt in India; use state's explicit taxPercentage (typically 0)
+  const taxPercentage = policy.taxPercentage || 0
   const taxCharge = (energyCharge * taxPercentage) / 100
 
   // Total bill
@@ -94,14 +103,16 @@ export const calculateCurrentBill = (billData, state = 'karnataka') => {
 
 /**
  * Recommend solar capacity based on consumption and sanctioned load
+ * Uses state-specific performance ratio instead of fixed efficiency
  */
 export const recommendSolarCapacity = (monthlyConsumption, sanctionedLoad, state = 'karnataka') => {
   const policy = STATE_POLICIES[state.toLowerCase()]
   const peakSunHours = policy.peakSunHours
+  const performanceRatio = policy.performanceRatio || DEFAULT_SOLAR_CONSTANTS.performanceRatio
 
-  // Industry standard: 80% of annual consumption / (Peak Sun Hours × 365)
+  // Industry standard: 80% of annual consumption / (Peak Sun Hours × 365 × PR)
   const annualConsumption = monthlyConsumption * 12
-  const recommendedCapacity = (annualConsumption * 0.80) / (peakSunHours * 365)
+  const recommendedCapacity = (annualConsumption * 0.80) / (peakSunHours * 365 * performanceRatio)
 
   // Constrain within state-specific policy limits
   const minCapacity = policy.capacityLimits.vnm.min
@@ -120,14 +131,16 @@ export const recommendSolarCapacity = (monthlyConsumption, sanctionedLoad, state
 
 /**
  * Calculate solar generation
+ * Uses state-specific performance ratio instead of hardcoded 85%
  */
 export const calculateSolarGeneration = (capacity, state = 'karnataka') => {
   const policy = STATE_POLICIES[state.toLowerCase()]
   const peakSunHours = policy.peakSunHours
-  const systemEfficiency = DEFAULT_SOLAR_CONSTANTS.systemEfficiency
+  const performanceRatio = policy.performanceRatio || DEFAULT_SOLAR_CONSTANTS.performanceRatio
 
+  // Annual generation accounting for performance ratio (inverter, wiring, soiling, temperature losses)
   const annualGross = capacity * peakSunHours * 365
-  const annualUsable = annualGross * systemEfficiency
+  const annualUsable = annualGross * performanceRatio
   const monthlyUsable = annualUsable / 12
 
   return {
@@ -139,15 +152,13 @@ export const calculateSolarGeneration = (capacity, state = 'karnataka') => {
 
 /**
  * Calculate NEW bill WITH solar using user's daytime consumption assumption
+ * CRITICAL FIX: Recalculates slab-based tariffs on reduced consumption (not using stale average)
  */
 export const calculateBillWithSolar = (billData, solarData, daytimeConsumptionPercent, state = 'karnataka') => {
   const {
     monthlyConsumption,
     consumerType,
     fixedCharges,
-    facPercentage = 3,
-    dutyPercentage = 12,
-    taxPercentage = 5,
     subsidyAmount = 0
   } = billData
 
@@ -157,40 +168,39 @@ export const calculateBillWithSolar = (billData, solarData, daytimeConsumptionPe
   const consumerTypeNorm = consumerType.toLowerCase()
   const retailTariffData = policy.retailTariff[consumerTypeNorm]
 
-  // Calculate import tariff (handles both flat and slab-based)
-  const importTariff = getAverageTariff(retailTariffData, monthlyConsumption)
-
-  // Export tariff from policy (no fallback - validated upfront)
-  const exportTariff = policy.exportTariff
-
   // Energy split based on user's daytime consumption %
   const daytimeConsumptionKwh = (monthlyConsumption * daytimeConsumptionPercent) / 100
 
   // Solar consumption (up to available solar during daytime)
   const solarConsumptionKwh = Math.min(monthlyUsableKwh, daytimeConsumptionKwh)
 
-  // Exported to grid
-  const exportedKwh = Math.max(0, monthlyUsableKwh - solarConsumptionKwh)
-
   // Grid consumption after solar
   const gridConsumptionKwh = monthlyConsumption - solarConsumptionKwh
 
-  // Energy charge from grid
-  const gridEnergyCharge = gridConsumptionKwh * importTariff
+  // CRITICAL FIX: Recalculate energy charge on REDUCED grid consumption (for slab tariffs)
+  // This ensures that consumption falling into cheaper lower slabs is accurately modeled
+  const gridEnergyResult = calculateEnergyCharge(gridConsumptionKwh, retailTariffData)
+  const gridEnergyCharge = gridEnergyResult.energyCharge
 
-  // Export credit
-  const exportCredit = exportedKwh * exportTariff
+  // Exported to grid (using state's net metering settlement rules)
+  const exportedKwh = Math.max(0, monthlyUsableKwh - solarConsumptionKwh)
 
-  // FAC on reduced energy
-  const facCharge = (gridEnergyCharge * facPercentage) / 100
+  // Export credit (use state-specific export rate from netMetering config)
+  const exportRate = getNetMeteringRate(policy)
+  const exportCredit = exportedKwh * exportRate
 
-  // Duty on reduced energy
+  // Get state-specific electricity duty by consumer category
+  const dutyPercentage = getElectricityDuty(policy, consumerType)
   const dutyCharge = (gridEnergyCharge * dutyPercentage) / 100
 
-  // Tax on reduced energy
+  // Get state-specific FAC
+  const facCharge = getFacCharge(policy, gridEnergyCharge, gridConsumptionKwh)
+
+  // Tax: Electricity is GST-exempt; use state's explicit taxPercentage (typically 0)
+  const taxPercentage = policy.taxPercentage || 0
   const taxCharge = (gridEnergyCharge * taxPercentage) / 100
 
-  // New total bill (fixed charges still apply)
+  // New total bill (fixed charges still apply, export credit reduces total)
   const totalBill = fixedCharges + gridEnergyCharge + facCharge + dutyCharge + taxCharge + subsidyAmount - exportCredit
 
   return {
@@ -205,14 +215,16 @@ export const calculateBillWithSolar = (billData, solarData, daytimeConsumptionPe
     exportCredit: Math.round(exportCredit),
     subsidyAmount,
     totalBill: Math.round(Math.max(0, totalBill)),
-    effectivePerUnitCost: gridConsumptionKwh > 0 ? parseFloat((totalBill / gridConsumptionKwh).toFixed(2)) : 0
+    effectivePerUnitCost: gridConsumptionKwh > 0 ? parseFloat((totalBill / gridConsumptionKwh).toFixed(2)) : 0,
+    slabBreakdown: gridEnergyResult.slabBreakdown
   }
 }
 
 /**
  * Calculate financial metrics
+ * NET INVESTMENT approach: payback = (system cost - subsidy) / annual savings
  */
-export const calculateFinancials = (currentBill, newBill, capacity, state = 'karnataka') => {
+export const calculateFinancials = (currentBill, newBill, capacity, consumerType, state = 'karnataka') => {
   const policy = STATE_POLICIES[state.toLowerCase()]
   const systemCostPerKw = policy.systemCost
 
@@ -220,13 +232,23 @@ export const calculateFinancials = (currentBill, newBill, capacity, state = 'kar
   const annualSavings = monthlySavings * 12
 
   const systemCost = capacity * systemCostPerKw
-  const paybackYears = systemCost / annualSavings
+
+  // Calculate applicable subsidy (PM Surya Ghar for residential/domestic consumers)
+  const applicableSubsidy = calculateSubsidy(capacity, consumerType)
+
+  // Net investment = system cost minus subsidy
+  const netInvestment = systemCost - applicableSubsidy
+
+  // Payback period using net investment
+  const paybackYears = annualSavings > 0 ? netInvestment / annualSavings : Infinity
 
   return {
     monthlySavings: Math.round(monthlySavings),
     annualSavings: Math.round(annualSavings),
     systemCost: Math.round(systemCost),
-    paybackYears: parseFloat(paybackYears.toFixed(1)),
+    applicableSubsidy: Math.round(applicableSubsidy),
+    netInvestment: Math.round(netInvestment),
+    paybackYears: paybackYears === Infinity ? 0 : parseFloat(paybackYears.toFixed(1)),
     percentReduction: parseFloat(((monthlySavings / currentBill.totalBill) * 100).toFixed(1))
   }
 }
@@ -241,9 +263,6 @@ export const calculateBillSimulation = (input, state = 'karnataka') => {
     consumerType = 'domestic',
     fixedCharges,
     energyCharge,
-    facPercentage = 3,
-    dutyPercentage = 12,
-    taxPercentage = 5,
     subsidyAmount = 0,
     daytimeConsumptionPercent = 40
   } = input
@@ -272,9 +291,6 @@ export const calculateBillSimulation = (input, state = 'karnataka') => {
     consumerType,
     fixedCharges,
     energyCharge,
-    facPercentage,
-    dutyPercentage,
-    taxPercentage,
     subsidyAmount
   }
   const currentBill = calculateCurrentBill(billData, normalizedState)
@@ -288,10 +304,11 @@ export const calculateBillSimulation = (input, state = 'karnataka') => {
   // Step 4: Calculate bill with solar
   const newBill = calculateBillWithSolar(billData, solarGeneration, daytimeConsumptionPercent, normalizedState)
 
-  // Step 5: Calculate financials
-  const financials = calculateFinancials(currentBill, newBill, recommendedCapacity, normalizedState)
+  // Step 5: Calculate financials (now includes subsidy calculation)
+  const financials = calculateFinancials(currentBill, newBill, recommendedCapacity, consumerType, normalizedState)
 
-  const peakSunHours = policy.peakSunHours || DEFAULT_SOLAR_CONSTANTS.peakSunHours
+  const peakSunHours = policy.peakSunHours
+  const performanceRatio = policy.performanceRatio || DEFAULT_SOLAR_CONSTANTS.performanceRatio
 
   return {
     before: {
@@ -306,13 +323,16 @@ export const calculateBillSimulation = (input, state = 'karnataka') => {
       exportedKwh: newBill.exportedKwh,
       monthlyBillRupees: newBill.totalBill,
       annualBillRupees: newBill.totalBill * 12,
-      effectivePerUnitRupees: newBill.effectivePerUnitCost
+      effectivePerUnitRupees: newBill.effectivePerUnitCost,
+      slabBreakdown: newBill.slabBreakdown
     },
     solar: {
       recommendedCapacityKw: recommendedCapacity,
       annualGenerationKwh: solarGeneration.annualUsableKwh,
       monthlyGenerationKwh: solarGeneration.monthlyUsableKwh,
       systemCostRupees: financials.systemCost,
+      applicableSubsidyRupees: financials.applicableSubsidy,
+      netInvestmentRupees: financials.netInvestment,
       paybackYears: financials.paybackYears
     },
     savings: {
@@ -326,13 +346,13 @@ export const calculateBillSimulation = (input, state = 'karnataka') => {
       daytimeConsumptionPercent,
       nighttimeConsumptionPercent: 100 - daytimeConsumptionPercent,
       peakSunHours,
-      systemEfficiencyPercent: (DEFAULT_SOLAR_CONSTANTS.systemEfficiency * 100),
+      performanceRatioPercent: (performanceRatio * 100),
       settlementPeriod: policy.settlementPeriod
     },
     metadata: {
       calculatedAt: new Date().toISOString(),
-      version: '2.1-BILL-SIMULATOR-STATE-AWARE',
-      accuracy: `Based on official ${policy.regulatoryBody} tariffs`
+      version: '3.0-ACCURATE-TARIFF-MODELING',
+      accuracy: `Based on official ${policy.regulatoryBody} tariffs with state-specific duty, FAC, and settlement rules`
     }
   }
 }
