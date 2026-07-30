@@ -41,32 +41,50 @@ export const STATE_POLICIES = {
     name: 'Rajasthan',
     regulatoryBody: 'RERC',
     retailTariff: {
-      domestic: 6.00,
-      commercial: 7.75,
-      industrial: 6.25,
-      agricultural: 6.13
+      domestic: {
+        type: 'telescopic',
+        slabs: [
+          { max: 50, rate: 4.75 },
+          { max: 150, rate: 5.45 },
+          { max: 300, rate: 6.50 },
+          { max: Infinity, rate: 7.00 }
+        ]
+      },
+      commercial: {
+        type: 'flat',
+        rate: 8.15
+      },
+      industrial: {
+        type: 'flat',
+        rate: 6.75
+      },
+      agricultural: {
+        type: 'flat',
+        rate: 1.88
+      }
     },
-    exportTariff: null,
+    exportTariff: 3.26,
     capacityLimits: {
-      vnm: { min: 1, max: 1000 },
-      gnm: { min: 1, max: 1000 }
+      vnm: { min: 1, max: 'sanctioned_load' },
+      gnm: { min: 1, max: 'sanctioned_load' }
     },
     vnm: {
       eligible: ['all'],
       billing: 'ratio-based',
-      banking: false,
+      banking: true,
       bankingCharges: 0,
       withdrawalCharges: 0
     },
     gnm: {
       eligible: ['all'],
       billing: 'priority-based',
-      banking: false,
+      banking: true,
       bankingCharges: 0,
-      withdrawalCharges: 0
+      withdrawalCharges: 0,
+      minSelfConsumption: 0.20
     },
-    systemCost: null,
-    peakSunHours: null,
+    systemCost: 50000,
+    peakSunHours: 5.8,
     settlementPeriod: 'monthly'
   },
 
