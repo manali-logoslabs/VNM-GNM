@@ -181,6 +181,58 @@ export const STATE_POLICIES = {
     settlementPeriod: 'monthly'
   },
 
+  delhi: {
+    name: 'Delhi',
+    regulatoryBody: 'DERC',
+    retailTariff: {
+      domestic: {
+        type: 'telescopic',
+        slabs: [
+          { max: 200, rate: 3.00 },
+          { max: 400, rate: 4.50 },
+          { max: 800, rate: 6.50 },
+          { max: 1200, rate: 7.00 },
+          { max: Infinity, rate: 8.00 }
+        ]
+      },
+      commercial: {
+        type: 'flat',
+        rate: 8.00
+      },
+      industrial: {
+        type: 'flat',
+        rate: 6.75
+      },
+      agricultural: {
+        type: 'flat',
+        rate: 1.00
+      }
+    },
+    exportTariff: 5.80,
+    capacityLimits: {
+      vnm: { min: 1, max: 'sanctioned_load' },
+      gnm: { min: 1, max: 'sanctioned_load' }
+    },
+    vnm: {
+      eligible: ['residential', 'group_housing', 'charitable', 'government', 'local_bodies'],
+      billing: 'ratio-based',
+      banking: true,
+      bankingCharges: 0,
+      withdrawalCharges: 0
+    },
+    gnm: {
+      eligible: ['all'],
+      billing: 'priority-based',
+      banking: true,
+      bankingCharges: 0,
+      withdrawalCharges: 0,
+      minSelfConsumption: 0.20
+    },
+    systemCost: 50000,
+    peakSunHours: 5.3,
+    settlementPeriod: 'monthly'
+  },
+
   maharashtra: {
     name: 'Maharashtra',
     regulatoryBody: 'MERC',
