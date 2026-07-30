@@ -4,6 +4,7 @@ export const STATES = {
   RAJASTHAN: 'rajasthan',
   MEGHALAYA: 'meghalaya',
   CHHATTISGARH: 'chhattisgarh',
+  DELHI: 'delhi',
 }
 
 export const STATE_DATA = {
@@ -136,6 +137,33 @@ export const STATE_DATA = {
     cons: [
       'Implementation pace varies',
       'Subsidy processing delays'
+    ]
+  },
+
+  [STATES.DELHI]: {
+    name: 'Delhi',
+    region: 'Northern India (NCR)',
+    vnmAvailable: true,
+    gnmAvailable: true,
+    maxCapacityVNM: '≤ sanctioned load',
+    maxCapacityGNM: '≤ sanctioned load',
+    minCapacity: '1 kW',
+    surplusTariff: '1:1 Net Metering',
+    eligibilityVNM: ['Residential', 'Group Housing', 'Charitable', 'Government'],
+    eligibilityGNM: ['All categories'],
+    discom: 'BRPL, BYPL, TPDDL, NDMC',
+    subsidy: 'PM Surya Ghar (30-40%)',
+    processingTime: '30-60 days',
+    highlights: [
+      '1:1 Net Metering (full unit adjustment)',
+      'Good solar resource (5.3 PSH)',
+      'Established DERC regulatory framework',
+      'Multiple DISCOMs with unified tariff'
+    ],
+    cons: [
+      'High urban space constraints',
+      'PPAC/FPPAS charges apply',
+      'Varying processing times by DISCOM'
     ]
   }
 }
