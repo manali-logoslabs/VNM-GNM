@@ -16,7 +16,8 @@ import {
   getElectricityDuty,
   getFacCharge,
   calculateSubsidy,
-  getNetMeteringRate
+  getNetMeteringRate,
+  calculateAnnualSettlement
 } from '../models/statePolicy.js'
 
 const DEFAULT_SOLAR_CONSTANTS = {
@@ -153,6 +154,10 @@ export const calculateSolarGeneration = (capacity, state = 'karnataka') => {
 /**
  * Calculate NEW bill WITH solar using user's daytime consumption assumption
  * CRITICAL FIX: Recalculates slab-based tariffs on reduced consumption (not using stale average)
+ *
+ * DELHI-SPECIFIC: 1:1 Net Metering with Annual Settlement
+ * - Monthly: Net Import = Consumption - Generation (bill on net import only)
+ * - Annual: Track surplus for settlement (DERC: surplus NOT credited at full retail rate)
  */
 export const calculateBillWithSolar = (billData, solarData, daytimeConsumptionPercent, state = 'karnataka') => {
   const {
@@ -167,6 +172,7 @@ export const calculateBillWithSolar = (billData, solarData, daytimeConsumptionPe
   const policy = STATE_POLICIES[state.toLowerCase()]
   const consumerTypeNorm = consumerType.toLowerCase()
   const retailTariffData = policy.retailTariff[consumerTypeNorm]
+  const isDelhi = state.toLowerCase() === 'delhi'
 
   // Energy split based on user's daytime consumption %
   const daytimeConsumptionKwh = (monthlyConsumption * daytimeConsumptionPercent) / 100
@@ -174,27 +180,51 @@ export const calculateBillWithSolar = (billData, solarData, daytimeConsumptionPe
   // Solar consumption (up to available solar during daytime)
   const solarConsumptionKwh = Math.min(monthlyUsableKwh, daytimeConsumptionKwh)
 
-  // Grid consumption after solar
+  // Grid consumption after solar (nighttime + any daytime deficit)
   const gridConsumptionKwh = monthlyConsumption - solarConsumptionKwh
 
-  // CRITICAL FIX: Recalculate energy charge on REDUCED grid consumption (for slab tariffs)
-  // This ensures that consumption falling into cheaper lower slabs is accurately modeled
-  const gridEnergyResult = calculateEnergyCharge(gridConsumptionKwh, retailTariffData)
-  const gridEnergyCharge = gridEnergyResult.energyCharge
-
-  // Exported to grid (using state's net metering settlement rules)
+  // Exported to grid (excess solar after daytime use)
   const exportedKwh = Math.max(0, monthlyUsableKwh - solarConsumptionKwh)
+
+  // DELHI SPECIAL CASE: 1:1 Net Metering
+  // Bill on NET IMPORT = Consumption - Generation (not grid consumption)
+  let effectiveConsumptionForBill
+  if (isDelhi) {
+    // Monthly Net Import = Total Consumption - Total Generation
+    const monthlyNetImportKwh = monthlyConsumption - monthlyUsableKwh
+    effectiveConsumptionForBill = Math.max(0, monthlyNetImportKwh)
+  } else {
+    // Other states: Bill on grid consumption (after solar offsets)
+    effectiveConsumptionForBill = gridConsumptionKwh
+  }
+
+  // CRITICAL FIX: Recalculate energy charge on effective consumption (for slab tariffs)
+  // This ensures that consumption falling into cheaper lower slabs is accurately modeled
+  const gridEnergyResult = calculateEnergyCharge(effectiveConsumptionForBill, retailTariffData)
+  const gridEnergyCharge = gridEnergyResult.energyCharge
 
   // Export credit (use state-specific export rate from netMetering config)
   const exportRate = getNetMeteringRate(policy)
   const exportCredit = exportedKwh * exportRate
+
+  // DELHI: Annual projection for settlement tracking
+  let annualConsumption, annualGeneration, annualNetImport, annualSurplus, annualSettlement
+  if (isDelhi) {
+    annualConsumption = monthlyConsumption * 12
+    annualGeneration = monthlyUsableKwh * 12
+    annualNetImport = Math.max(0, annualConsumption - annualGeneration)
+    annualSurplus = Math.max(0, annualGeneration - annualConsumption)
+
+    // Calculate annual settlement credit (if any surplus exists)
+    annualSettlement = calculateAnnualSettlement(annualSurplus, policy)
+  }
 
   // Get state-specific electricity duty by consumer category
   const dutyPercentage = getElectricityDuty(policy, consumerType)
   const dutyCharge = (gridEnergyCharge * dutyPercentage) / 100
 
   // Get state-specific FAC
-  const facCharge = getFacCharge(policy, gridEnergyCharge, gridConsumptionKwh)
+  const facCharge = getFacCharge(policy, gridEnergyCharge, effectiveConsumptionForBill)
 
   // Tax: Electricity is GST-exempt; use state's explicit taxPercentage (typically 0)
   const taxPercentage = policy.taxPercentage || 0
@@ -203,7 +233,7 @@ export const calculateBillWithSolar = (billData, solarData, daytimeConsumptionPe
   // New total bill (fixed charges still apply, export credit reduces total)
   const totalBill = fixedCharges + gridEnergyCharge + facCharge + dutyCharge + taxCharge + subsidyAmount - exportCredit
 
-  return {
+  const billResult = {
     gridConsumptionKwh: Math.round(gridConsumptionKwh),
     solarConsumptionKwh: Math.round(solarConsumptionKwh),
     exportedKwh: Math.round(exportedKwh),
@@ -215,21 +245,41 @@ export const calculateBillWithSolar = (billData, solarData, daytimeConsumptionPe
     exportCredit: Math.round(exportCredit),
     subsidyAmount,
     totalBill: Math.round(Math.max(0, totalBill)),
-    effectivePerUnitCost: gridConsumptionKwh > 0 ? parseFloat((totalBill / gridConsumptionKwh).toFixed(2)) : 0,
+    effectivePerUnitCost: effectiveConsumptionForBill > 0 ? parseFloat((totalBill / effectiveConsumptionForBill).toFixed(2)) : 0,
     slabBreakdown: gridEnergyResult.slabBreakdown
   }
+
+  // DELHI: Add annual settlement tracking and credit
+  if (isDelhi) {
+    billResult.annualConsumption = Math.round(annualConsumption)
+    billResult.annualGeneration = Math.round(annualGeneration)
+    billResult.annualNetImport = Math.round(annualNetImport)
+    billResult.annualSurplus = Math.round(annualSurplus)
+    // Add annual settlement details (credit for surplus at reduced APPC rate)
+    billResult.annualSettlement = annualSettlement
+  }
+
+  return billResult
 }
 
 /**
  * Calculate financial metrics
  * NET INVESTMENT approach: payback = (system cost - subsidy) / annual savings
+ *
+ * For Delhi: Annual savings includes settlement credit for surplus (if any)
  */
 export const calculateFinancials = (currentBill, newBill, capacity, consumerType, state = 'karnataka') => {
   const policy = STATE_POLICIES[state.toLowerCase()]
   const systemCostPerKw = policy.systemCost
+  const isDelhi = state.toLowerCase() === 'delhi'
 
   const monthlySavings = currentBill.totalBill - newBill.totalBill
-  const annualSavings = monthlySavings * 12
+  let annualSavings = monthlySavings * 12
+
+  // DELHI: Add annual settlement credit to annual savings
+  if (isDelhi && newBill.annualSettlement?.credit > 0) {
+    annualSavings += newBill.annualSettlement.credit
+  }
 
   const systemCost = capacity * systemCostPerKw
 
@@ -324,7 +374,16 @@ export const calculateBillSimulation = (input, state = 'karnataka') => {
       monthlyBillRupees: newBill.totalBill,
       annualBillRupees: newBill.totalBill * 12,
       effectivePerUnitRupees: newBill.effectivePerUnitCost,
-      slabBreakdown: newBill.slabBreakdown
+      slabBreakdown: newBill.slabBreakdown,
+      ...(normalizedState === 'delhi' && {
+        // DELHI: Annual settlement tracking (1:1 net metering specific)
+        annualConsumptionKwh: newBill.annualConsumption,
+        annualGenerationKwh: newBill.annualGeneration,
+        annualNetImportKwh: newBill.annualNetImport,
+        annualSurplusKwh: newBill.annualSurplus,
+        annualSettlementRupees: newBill.annualSettlement?.credit || 0,
+        annualSettlementDetails: newBill.annualSettlement
+      })
     },
     solar: {
       recommendedCapacityKw: recommendedCapacity,

@@ -68,9 +68,9 @@ export const STATE_POLICIES = {
         type: 'telescopic',
         slabs: [
           { max: 50, rate: 4.75 },
-          { max: 150, rate: 5.45 },
-          { max: 300, rate: 6.50 },
-          { max: Infinity, rate: 7.00 }
+          { max: 150, rate: 6.00 },
+          { max: 500, rate: 7.00 },
+          { max: Infinity, rate: 7.50 }
         ]
       },
       commercial: {
@@ -79,11 +79,11 @@ export const STATE_POLICIES = {
       },
       industrial: {
         type: 'flat',
-        rate: 6.75
+        rate: 6.00
       },
       agricultural: {
         type: 'flat',
-        rate: 1.88
+        rate: 1.75
       }
     },
     exportTariff: 3.26,
@@ -274,18 +274,18 @@ export const STATE_POLICIES = {
       },
       commercial: {
         type: 'flat',
-        rate: 8.00
+        rate: 6.00
       },
       industrial: {
         type: 'flat',
-        rate: 6.75
+        rate: 7.75
       },
       agricultural: {
         type: 'flat',
-        rate: 1.00
+        rate: 1.50
       }
     },
-    exportTariff: 5.80,
+    exportTariff: 0,
     electricityDuty: {
       domestic: 0,
       commercial: 0,
@@ -317,14 +317,22 @@ export const STATE_POLICIES = {
       withdrawalCharges: 0,
       minSelfConsumption: 0.20
     },
-    systemCost: 50000,
+    systemCost: 47500,
     peakSunHours: 5.3,
     settlementPeriod: 'monthly',
     netMetering: {
       settlement: 'monthly',
       carryForward: true,
-      exportCompensation: 'retail',
-      exportRate: 5.80
+      exportCompensation: 'net_metering_1to1',
+      exportRate: 0
+    },
+    // Annual Settlement for 1:1 Net Metering (DERC Rule: surplus NOT credited at full retail)
+    annualSettlement: {
+      appcRate: 3.50,  // Average Power Purchase Cost (APPC) for FY 2025-26
+      appcRateSource: 'DERC Tariff Order FY 2025-26',
+      appcRateLastUpdated: '2025-06-15',
+      settlementMethod: 'appc',  // 'appc' = reduced rate, 'forfeited' = ₹0, 'carry_forward' = next year
+      description: 'Annual surplus (generation > consumption) credited at APPC rate, not full retail tariff'
     }
   },
 
@@ -513,4 +521,40 @@ export const calculateSubsidy = (capacityKw, consumerType) => {
  */
 export const getNetMeteringRate = (policy) => {
   return policy.netMetering?.exportRate || policy.exportTariff || 0
+}
+
+/**
+ * Calculate Annual Settlement Credit (Delhi specific)
+ * For states with 1:1 net metering + annual settlement
+ * DERC Rule: "Surplus NOT credited at full retail tariff"
+ *
+ * Calculation:
+ * - If annual surplus > 0: Credit at APPC rate (reduced from retail)
+ * - If annual net import: No settlement credit (already paid via monthly bills)
+ */
+export const calculateAnnualSettlement = (annualSurplusKwh, policy) => {
+  if (!policy.annualSettlement) return { credit: 0, surplusKwh: 0, method: 'none' }
+  if (annualSurplusKwh <= 0) return { credit: 0, surplusKwh: 0, method: 'none' }
+
+  const { appcRate, settlementMethod } = policy.annualSettlement
+
+  let settlementCredit = 0
+  if (settlementMethod === 'appc') {
+    // Credit at APPC rate (50-70% of retail rate)
+    settlementCredit = annualSurplusKwh * appcRate
+  } else if (settlementMethod === 'forfeited') {
+    // Surplus forfeited (no compensation)
+    settlementCredit = 0
+  } else if (settlementMethod === 'carry_forward') {
+    // Carry forward to next year (no settlement this year)
+    settlementCredit = 0
+  }
+
+  return {
+    surplusKwh: Math.round(annualSurplusKwh),
+    appcRate: appcRate,
+    credit: Math.round(settlementCredit),
+    method: settlementMethod,
+    explanation: `${annualSurplusKwh.toFixed(0)} kWh × ₹${appcRate}/kWh = ₹${settlementCredit.toFixed(0)} (DERC annual settlement)`
+  }
 }

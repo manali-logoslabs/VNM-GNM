@@ -333,6 +333,7 @@ export default function BillSimulator() {
                       >
                         <option value="karnataka">Karnataka (KERC)</option>
                         <option value="chhattisgarh">Chhattisgarh (CSERC)</option>
+                        <option value="delhi">Delhi (DERC)</option>
                         <option value="maharashtra">Maharashtra (MERC)</option>
                         <option value="rajasthan">Rajasthan (RERC)</option>
                         <option value="meghalaya">Meghalaya (MSERC)</option>
