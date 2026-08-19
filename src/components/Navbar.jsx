@@ -100,7 +100,7 @@ export default function Navbar() {
 
             {/* CTA Buttons */}
             <div className="hidden md:flex items-center gap-3">
-              <Link to="/bill-simulator" className="btn-primary text-sm">
+              <Link to="/delhi-vnm-gnm" className="btn-primary text-sm">
                 <Zap className="w-4 h-4" />
                 Calculate
               </Link>
@@ -190,7 +190,7 @@ export default function Navbar() {
                   </Link>
                 ))}
                 <div className="pt-2 border-t border-slate-200 space-y-2">
-                  <Link to="/bill-simulator" className="btn-primary w-full justify-center text-sm">
+                  <Link to="/delhi-vnm-gnm" className="btn-primary w-full justify-center text-sm">
                     <Zap className="w-4 h-4" />
                     Calculate Savings
                   </Link>
